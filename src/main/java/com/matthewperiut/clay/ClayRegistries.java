@@ -7,7 +7,6 @@ public class ClayRegistries {
 
     public static void init() {
         EntityTypeRegistry.init();
-        AttributeRegistry.init();
         TabsRegistry.init();
         ItemRegistry.init();
         UpgradeRegistry.init();
@@ -21,7 +20,6 @@ public class ClayRegistries {
     public static void initClient() {
         EntityTypeRegistry.clientRegister();
         ItemRegistry.clientRegister();
-        RenderRegistry.init();
     }
 
 

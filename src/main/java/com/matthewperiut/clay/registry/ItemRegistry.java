@@ -18,8 +18,8 @@ import com.matthewperiut.clay.item.disruptor.TerracottaMaterial;
 import com.matthewperiut.clay.item.horse.HorseDollItem;
 import com.matthewperiut.clay.item.soldier.SoldierDollItem;
 import com.matthewperiut.clay.util.ClientInfoStorage;
-import dev.architectury.registry.registries.DeferredRegister;
-import dev.architectury.registry.registries.RegistrySupplier;
+import com.matthewperiut.clay.platform.DeferredRegister;
+import com.matthewperiut.clay.platform.RegistrySupplier;
 
 import java.util.function.Supplier;
 
@@ -77,9 +77,6 @@ public class ItemRegistry {
         ITEMS.register();
         HORSE_ITEMS.register();
         MISC_ITEMS.register();
-        ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_GROUP, item));
-        HORSE_ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_GROUP, item));
-        MISC_ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_MISC_GROUP, item));
     }
 
     public static void post() {

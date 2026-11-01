@@ -1,21 +1,21 @@
 package com.matthewperiut.clay.neoforge;
 import com.matthewperiut.clay.ClayMod;
-import dev.architectury.platform.Platform;
+import com.matthewperiut.clay.registry.AttributeRegistry;
+import com.matthewperiut.clay.network.ClayNetworking;
+import com.matthewperiut.clay.platform.DeferredRegister;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 @Mod(ClayMod.MOD_ID)
 public final class ClayModNeoForge {
     public ClayModNeoForge(IEventBus bus) {
+        DeferredRegister.attach(bus);
         ClayMod.init();
-        if (Platform.getEnv() == Dist.DEDICATED_SERVER) {
-            dev.architectury.networking.NetworkManager.registerS2CPayloadType(com.matthewperiut.clay.network.payload.SyncUpgradesPayload.ID, com.matthewperiut.clay.network.payload.SyncUpgradesPayload.CODEC);
-        }
+        bus.addListener(AttributeRegistry::register);
+        bus.addListener(ClayNetworking::register);
         bus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(ClayMod::post));
-        if (Platform.getEnv() == Dist.CLIENT) {
-            ClayMod.initClient();
-        }
+        if (FMLEnvironment.getDist() == Dist.CLIENT) ClientEntrypoint.init(bus);
     }
 }

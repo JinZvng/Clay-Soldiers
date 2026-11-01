@@ -11,8 +11,8 @@ import com.matthewperiut.clay.entity.horse.HorseDollEntity;
 import com.matthewperiut.clay.entity.soldier.SoldierDollEntity;
 import com.matthewperiut.clay.entity.soldier.variant.*;
 import com.matthewperiut.clay.util.ClientInfoStorage;
-import dev.architectury.registry.registries.DeferredRegister;
-import dev.architectury.registry.registries.RegistrySupplier;
+import com.matthewperiut.clay.platform.DeferredRegister;
+import com.matthewperiut.clay.platform.RegistrySupplier;
 
 import static com.matthewperiut.clay.ClayRegistries.getIdentifier;
 

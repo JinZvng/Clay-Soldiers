@@ -6,7 +6,6 @@ import com.matthewperiut.clay.ClayMod;
 import com.matthewperiut.clay.network.payload.SyncUpgradesPayload;
 import com.matthewperiut.clay.upgrade.ISoldierUpgrade;
 import com.matthewperiut.clay.util.NetworkUtils;
-import dev.architectury.networking.NetworkManager;
 
 import java.util.List;
 
@@ -14,6 +13,6 @@ import java.util.List;
 public class UpgradeAdded {
 
     public static void sendPacket(Iterable<ServerPlayer> players, int entityId, ISoldierUpgrade upgrade) {
-        NetworkManager.sendToPlayers(players, new SyncUpgradesPayload(entityId, SyncUpgradesPayload.Action.ADD, List.of(upgrade)));
+        com.matthewperiut.clay.network.ClayNetworking.sendToPlayers(players, new SyncUpgradesPayload(entityId, SyncUpgradesPayload.Action.ADD, List.of(upgrade)));
     }
 }

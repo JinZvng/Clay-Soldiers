@@ -60,8 +60,6 @@ import com.matthewperiut.clay.registry.TeamRegistry;
 import com.matthewperiut.clay.upgrade.ISoldierUpgrade;
 import com.matthewperiut.clay.upgrade.UpgradeInstance;
 import com.matthewperiut.clay.upgrade.UpgradeManager;
-import dev.architectury.extensions.network.EntitySpawnExtension;
-import dev.architectury.networking.NetworkManager;
 import org.jetbrains.annotations.NotNull;
 import com.geckolib.animatable.GeoAnimatable;
 import com.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -77,7 +75,7 @@ import java.util.*;
 import static com.matthewperiut.clay.entity.soldier.teams.ITeam.NBT_IDENTIFIER;
 import static com.matthewperiut.clay.registry.TeamRegistry.CLAY_TEAM;
 
-public class SoldierDollEntity extends PathfinderMob implements com.geckolib.animatable.GeoEntity, EntitySpawnExtension {
+public class SoldierDollEntity extends PathfinderMob implements com.geckolib.animatable.GeoEntity, net.neoforged.neoforge.entity.IEntityWithComplexSpawn {
     public static final com.geckolib.constant.dataticket.DataTicket<Boolean> RIDING = com.geckolib.constant.dataticket.DataTicket.create("clay_riding", Boolean.class);
     public static final Identifier TEXTURE_ID = Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "textures/entity/soldier/lightgray.png");
     private final AnimatableInstanceCache animationCache = GeckoLibUtil.createInstanceCache(this);
@@ -282,13 +280,13 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     }
 
     @Override
-    public void saveAdditionalSpawnData(FriendlyByteBuf buf) {
+    public void writeSpawnData(net.minecraft.network.RegistryFriendlyByteBuf buf) {
         SyncUpgradesS2CPacket syncUpgradeData = new SyncUpgradesS2CPacket(this);
         syncUpgradeData.write(buf);
     }
 
     @Override
-    public void loadAdditionalSpawnData(FriendlyByteBuf buf) {
+    public void readSpawnData(net.minecraft.network.RegistryFriendlyByteBuf buf) {
         SyncUpgradesS2CPacket syncUpgradeData = new SyncUpgradesS2CPacket(buf);
         this.upgrades = new HashSet<>(syncUpgradeData.getUpgrades());
         this.upgrades.forEach(u -> u.onAdd(this));

@@ -11,17 +11,13 @@ import com.matthewperiut.clay.upgrade.extension.SoldierWoolUpgrade;
 import com.matthewperiut.clay.upgrade.hand.SoldierStickUpgrade;
 import com.matthewperiut.clay.upgrade.misc.SoldierGlowstoneUpgrade;
 import com.matthewperiut.clay.upgrade.misc.SoldierGoldIngotUpgrade;
-import dev.architectury.registry.registries.Registrar;
-import dev.architectury.registry.registries.RegistrarManager;
-import dev.architectury.registry.registries.RegistrySupplier;
+import com.matthewperiut.clay.platform.RegistrySupplier;
 
 public class UpgradeRegistry {
     public static final Identifier REGISTRY_ID = Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "upgrades");
     public static final ResourceKey<Registry<ISoldierUpgrade>> UPGRADES_KEY =
             ResourceKey.createRegistryKey(REGISTRY_ID);
-    public static final Registrar<ISoldierUpgrade> SOLDIER_UPGRADE_REGISTER = RegistrarManager.get(ClayMod.MOD_ID).<ISoldierUpgrade>builder(REGISTRY_ID)
-            .syncToClients()
-            .build();
+    public static final com.matthewperiut.clay.platform.SmallRegistry<ISoldierUpgrade> SOLDIER_UPGRADE_REGISTER = new com.matthewperiut.clay.platform.SmallRegistry<>(REGISTRY_ID);
 
     public static final RegistrySupplier<ISoldierUpgrade> STICK_UPGRADE = SOLDIER_UPGRADE_REGISTER.register(SoldierStickUpgrade.IDENTIFIER, SoldierStickUpgrade::new);
     public static final RegistrySupplier<ISoldierUpgrade> GLOWSTONE_UPGRADE = SOLDIER_UPGRADE_REGISTER.register(SoldierGlowstoneUpgrade.IDENTIFIER, SoldierGlowstoneUpgrade::new);

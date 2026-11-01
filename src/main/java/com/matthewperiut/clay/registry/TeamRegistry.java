@@ -6,9 +6,7 @@ import net.minecraft.resources.ResourceKey;
 import com.matthewperiut.clay.ClayMod;
 import com.matthewperiut.clay.entity.soldier.teams.ITeam;
 import com.matthewperiut.clay.entity.soldier.teams.StandardTeam;
-import dev.architectury.registry.registries.Registrar;
-import dev.architectury.registry.registries.RegistrarManager;
-import dev.architectury.registry.registries.RegistrySupplier;
+import com.matthewperiut.clay.platform.RegistrySupplier;
 
 import static com.matthewperiut.clay.ClayRegistries.getIdentifier;
 import static com.matthewperiut.clay.registry.ItemRegistry.*;
@@ -17,10 +15,7 @@ public class TeamRegistry {
     public static final Identifier REGISTRY_ID = Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "teams");
     public static final ResourceKey<Registry<ITeam>> REGISTRY_TEAMS_KEY =
             ResourceKey.createRegistryKey(REGISTRY_ID);
-    public static final Registrar<ITeam> SOLDIER_TEAMS = RegistrarManager
-            .get(ClayMod.MOD_ID)
-            .<ITeam>builder(REGISTRY_ID)
-            .build();
+    public static final com.matthewperiut.clay.platform.SmallRegistry<ITeam> SOLDIER_TEAMS = new com.matthewperiut.clay.platform.SmallRegistry<>(REGISTRY_ID);
 
     public static final RegistrySupplier<ITeam> CLAY_TEAM = SOLDIER_TEAMS.register(getIdentifier("clay"), () -> new StandardTeam((short) 0, "Standard Team", CLAY_SOLDIER_ITEM));
     public static final RegistrySupplier<ITeam> RED_TEAM = SOLDIER_TEAMS.register(getIdentifier("red"), () -> new StandardTeam((short) 1, "Red Team", RED_SOLDIER_ITEM));

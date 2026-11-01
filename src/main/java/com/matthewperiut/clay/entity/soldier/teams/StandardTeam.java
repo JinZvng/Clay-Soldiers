@@ -2,7 +2,7 @@ package com.matthewperiut.clay.entity.soldier.teams;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import dev.architectury.registry.registries.RegistrySupplier;
+import com.matthewperiut.clay.platform.RegistrySupplier;
 
 public class StandardTeam implements ITeam {
     private final short teamId;

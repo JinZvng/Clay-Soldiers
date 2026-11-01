@@ -7,7 +7,6 @@ group = 'com.matthewperiut'
 base { archivesName = 'clay-neoforge-26.3' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 repositories {
-    maven { url = 'https://maven.architectury.dev/' }
     maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 neoForge {
@@ -19,7 +18,6 @@ neoForge {
     mods { clay { sourceSet(sourceSets.main) } }
 }
 dependencies {
-    implementation 'dev.architectury:architectury-neoforge:21.0.5'
     implementation 'com.geckolib:geckolib-neoforge-26.3:5.5.7'
 }
 tasks.register('preparePortResources', Exec) {

@@ -24,6 +24,5 @@ public class ClayMod
 
     public static void initClient() {
         ClayRegistries.initClient();
-        ClientNetworkHandler.init();
     }
 }

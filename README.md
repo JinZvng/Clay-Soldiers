@@ -7,10 +7,9 @@ Port of Slainlite / matthewperiut's Clay Soldiers, retaining the original MIT li
 - Minecraft Java 26.3
 - NeoForge 26.3.0.101 or a compatible later build for Minecraft 26.3
 - GeckoLib 5.5.7 for NeoForge 26.3
-- Architectury API 21.0.5 for NeoForge
 - Java JDK 25 to build
 
-Install all three mod JARs (Clay Soldiers, GeckoLib and Architectury) in the same instance's `mods` directory.
+Install both mod JARs (Clay Soldiers and GeckoLib) in the same instance's `mods` directory.
 Use a new test world before opening existing saves; compatibility with old Forge saves is not established.
 
 ## Build in Codespaces

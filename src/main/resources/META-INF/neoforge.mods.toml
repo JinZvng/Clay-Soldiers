@@ -19,7 +19,3 @@ versionRange="[26.3.0.101,)"
 modId="geckolib"
 type="required"
 versionRange="[5.5.7,6)"
-[[dependencies.clay]]
-modId="architectury"
-type="required"
-versionRange="[21.0.5,)"
