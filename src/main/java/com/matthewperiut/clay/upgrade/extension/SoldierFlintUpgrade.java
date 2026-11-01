@@ -31,13 +31,13 @@ public class SoldierFlintUpgrade implements ISoldierUpgrade {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return !soldier.upgrades.contains(this) && itemStack.isOf(Items.FLINT) && soldier.upgrades.contains(STICK_UPGRADE.get());
+        return !soldier.upgrades.contains(this) && itemStack.is(Items.FLINT) && soldier.upgrades.contains(STICK_UPGRADE.get());
     }
 
     @Override
-    public void pushNewPack(SoldierDollEntity soldier) {
+    public void onAdd(SoldierDollEntity soldier) {
         soldier.playSound(SoundEvents.ANVIL_USE);
-        AttributeInstance attackInstance = soldier.getAttributeInstance(Attributes.ATTACK_DAMAGE);
+        AttributeInstance attackInstance = soldier.getAttribute(Attributes.ATTACK_DAMAGE);
         AttributeModifier attributeModifier = new AttributeModifier(SOLDIER_FLINT_UPGRADE, 1, AttributeModifier.Operation.ADD_VALUE);
         if (attackInstance != null && !attackInstance.hasModifier(attributeModifier.id()))
             attackInstance.addPermanentModifier(attributeModifier);
@@ -45,7 +45,7 @@ public class SoldierFlintUpgrade implements ISoldierUpgrade {
 
     @Override
     public void onRemove(SoldierDollEntity soldier) {
-        AttributeInstance attackInstance = soldier.getAttributeInstance(Attributes.ATTACK_DAMAGE);
+        AttributeInstance attackInstance = soldier.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackInstance != null)
             attackInstance.removeModifier(SOLDIER_FLINT_UPGRADE);
     }

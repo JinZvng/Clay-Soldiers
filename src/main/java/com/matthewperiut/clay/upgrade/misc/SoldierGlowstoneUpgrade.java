@@ -29,11 +29,11 @@ public class SoldierGlowstoneUpgrade implements ISoldierUpgrade {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return !soldier.upgrades.contains(this) && itemStack.isOf(Items.GLOWSTONE_DUST);
+        return !soldier.upgrades.contains(this) && itemStack.is(Items.GLOWSTONE_DUST);
     }
 
     @Override
-    public void pushNewPack(SoldierDollEntity soldier) {
+    public void onAdd(SoldierDollEntity soldier) {
         if (soldier.level().isClientSide())
             soldier.setLightBlockUnaffected(true);
     }
@@ -46,7 +46,7 @@ public class SoldierGlowstoneUpgrade implements ISoldierUpgrade {
 
     @Override
     public void onLoad(SoldierDollEntity soldier) {
-        pushNewPack(soldier);
+        onAdd(soldier);
     }
 
     @Override

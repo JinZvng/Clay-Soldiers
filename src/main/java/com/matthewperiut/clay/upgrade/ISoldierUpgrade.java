@@ -30,7 +30,7 @@ public interface ISoldierUpgrade {
      *
      * @param soldier which got the upgrade added
      */
-    default void pushNewPack(SoldierDollEntity soldier) {
+    default void onAdd(SoldierDollEntity soldier) {
     }
 
     /**

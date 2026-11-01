@@ -28,12 +28,12 @@ import static com.matthewperiut.clay.registry.TabsRegistry.CLAY_GROUP;
 import static com.matthewperiut.clay.registry.TabsRegistry.CLAY_MISC_GROUP;
 
 public class ItemRegistry {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ClayMod.MOD_ID, (ResourceKey<Registry<Item>>) BuiltInRegistries.ITEM.getKey());
-    public static final DeferredRegister<Item> HORSE_ITEMS = DeferredRegister.create(ClayMod.MOD_ID, (ResourceKey<Registry<Item>>) BuiltInRegistries.ITEM.getKey());
-    public static final DeferredRegister<Item> MISC_ITEMS = DeferredRegister.create(ClayMod.MOD_ID, (ResourceKey<Registry<Item>>) BuiltInRegistries.ITEM.getKey());
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ClayMod.MOD_ID, net.minecraft.core.registries.Registries.ITEM);
+    public static final DeferredRegister<Item> HORSE_ITEMS = DeferredRegister.create(ClayMod.MOD_ID, net.minecraft.core.registries.Registries.ITEM);
+    public static final DeferredRegister<Item> MISC_ITEMS = DeferredRegister.create(ClayMod.MOD_ID, net.minecraft.core.registries.Registries.ITEM);
 
     //region SOLDIERS
-    public static final RegistrySupplier<Item> BRICK_SOLDIER = registerMiscItem("soldier/brick", () -> new Item(miscSettings()));
+    public static final RegistrySupplier<Item> BRICK_SOLDIER = registerMiscItem("soldier/brick", () -> new Item(miscSettings("soldier/brick")));
 
     public static final RegistrySupplier<Item> CLAY_SOLDIER_ITEM = registerItem("soldier/clay", CLAY_SOLDIER);
     public static final RegistrySupplier<Item> RED_SOLDIER_ITEM = registerItem("soldier/red", RED_SOLDIER);
@@ -54,7 +54,7 @@ public class ItemRegistry {
 //endregion
 
     //region HORSES
-    public static final RegistrySupplier<Item> BRICK_HORSE = registerMiscItem("horse/brick", () -> new Item(miscSettings()));
+    public static final RegistrySupplier<Item> BRICK_HORSE = registerMiscItem("horse/brick", () -> new Item(miscSettings("horse/brick")));
 
     public static final RegistrySupplier<Item> DIRT_HORSE_ITEM = registerHorseDollItem("horse/dirt", DIRT_HORSE);
     public static final RegistrySupplier<Item> SAND_HORSE_ITEM = registerHorseDollItem("horse/sand", SAND_HORSE);
@@ -69,9 +69,9 @@ public class ItemRegistry {
 //endregion
 
     // misc
-    public static RegistrySupplier<Item> CLAY_DISRUPTOR = registerMiscItem("disruptor/clay", () -> new DisruptorItem(new ClayMaterial(), new Item.Properties().stacksTo(1).arch$tab(CLAY_MISC_GROUP)));
-    public static RegistrySupplier<Item> TERRACOTTA_DISRUPTOR = registerMiscItem("disruptor/terracotta", () -> new DisruptorItem(new TerracottaMaterial(), new Item.Properties().stacksTo(1).arch$tab(CLAY_MISC_GROUP)));
-    public static RegistrySupplier<Item> OBSIDIAN_DISRUPTOR = registerMiscItem("disruptor/obsidian", () -> new DisruptorItem(new Item.Properties().stacksTo(1).arch$tab(CLAY_MISC_GROUP)));
+    public static RegistrySupplier<Item> CLAY_DISRUPTOR = registerMiscItem("disruptor/clay", () -> new DisruptorItem(new ClayMaterial(), new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier("disruptor/clay"))).stacksTo(1)));
+    public static RegistrySupplier<Item> TERRACOTTA_DISRUPTOR = registerMiscItem("disruptor/terracotta", () -> new DisruptorItem(new TerracottaMaterial(), new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier("disruptor/terracotta"))).stacksTo(1)));
+    public static RegistrySupplier<Item> OBSIDIAN_DISRUPTOR = registerMiscItem("disruptor/obsidian", () -> new DisruptorItem(new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier("disruptor/obsidian"))).stacksTo(1)));
 
     public static void init() {
         ITEMS.register();
@@ -125,22 +125,22 @@ public class ItemRegistry {
     }
 
     public static RegistrySupplier<Item> registerItem(String name, RegistrySupplier<EntityType<? extends SoldierDollEntity>> entity) {
-        return ITEMS.register(name, () -> new SoldierDollItem(entity::get, settings()));
+        return ITEMS.register(name, () -> new SoldierDollItem(entity::get, settings(name)));
     }
 
     public static RegistrySupplier<Item> registerHorseDollItem(String name, RegistrySupplier<EntityType<HorseDollEntity>> entity) {
-        return HORSE_ITEMS.register(name, () -> new HorseDollItem(entity::get, settings()));
+        return HORSE_ITEMS.register(name, () -> new HorseDollItem(entity::get, settings(name)));
     }
 
     public static RegistrySupplier<Item> registerMiscItem(String name, Supplier<Item> item) {
         return MISC_ITEMS.register(name, item);
     }
 
-    private static Item.Properties settings() {
-        return new Item.Properties().stacksTo(16).arch$tab(CLAY_GROUP);
+    private static Item.Properties settings(String name) {
+        return new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier(name))).stacksTo(16);
     }
 
-    private static Item.Properties miscSettings() {
-        return new Item.Properties().fireResistant().stacksTo(16).arch$tab(CLAY_MISC_GROUP);
+    private static Item.Properties miscSettings(String name) {
+        return new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier(name))).fireResistant().stacksTo(16);
     }
 }

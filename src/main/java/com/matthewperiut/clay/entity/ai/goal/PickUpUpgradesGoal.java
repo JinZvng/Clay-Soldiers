@@ -15,7 +15,7 @@ public class PickUpUpgradesGoal extends Goal {
 
     public PickUpUpgradesGoal(SoldierDollEntity entity) {
         this.entity = entity;
-        this.setFlags(EnumSet.of(Control.MOVE));
+        this.setFlags(EnumSet.of(Flag.MOVE));
     }
 
     @Override

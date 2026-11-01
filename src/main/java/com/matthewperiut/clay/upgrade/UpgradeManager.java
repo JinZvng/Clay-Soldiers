@@ -27,9 +27,9 @@ public class UpgradeManager {
             if (upgrade.needsCustomData())
                 soldier.upgradeInstances.put(upgrade, new UpgradeInstance(new CompoundTag()));
 
-            upgrade.pushNewPack(soldier);
+            upgrade.onAdd(soldier);
             if (upgrade.shouldSyncToClient()) {
-                UpgradeAdded.sendPacket(HttpUtil.getTrackingPlayers(soldier), soldier.getId(), upgrade);
+                UpgradeAdded.sendPacket(NetworkUtils.getTrackingPlayers(soldier), soldier.getId(), upgrade);
             }
         }
     }
@@ -50,7 +50,7 @@ public class UpgradeManager {
 
         handleDependencies(soldier, upgrade);
         if (upgrade.shouldSyncToClient()) {
-            UpgradeRemoved.sendPacket(HttpUtil.getTrackingPlayers(soldier), soldier.getId(), upgrade);
+            UpgradeRemoved.sendPacket(NetworkUtils.getTrackingPlayers(soldier), soldier.getId(), upgrade);
         }
     }
 
@@ -83,7 +83,7 @@ public class UpgradeManager {
     }
 
     public ISoldierUpgrade getUpgrade(ItemStack stack) {
-        Optional<Map.Entry<ItemStack, ISoldierUpgrade>> optionalEntry = possibleUpgrades.entrySet().stream().filter(e -> e.getKey().isOf(stack.getItem())).findClosest();
+        Optional<Map.Entry<ItemStack, ISoldierUpgrade>> optionalEntry = possibleUpgrades.entrySet().stream().filter(e -> e.getKey().is(stack.getItem())).findFirst();
         return optionalEntry.map(Map.Entry::getValue).orElse(null);
     }
 

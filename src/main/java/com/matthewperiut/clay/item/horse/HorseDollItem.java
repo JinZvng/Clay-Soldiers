@@ -8,12 +8,12 @@ import java.util.function.Supplier;
 
 public class HorseDollItem extends SpawnDollItem
 {
-    public HorseDollItem(ArrayList<Supplier<EntityType<?>>> types, Settings settings)
+    public HorseDollItem(ArrayList<Supplier<EntityType<?>>> types, Properties settings)
     {
         super(types, settings);
     }
 
-    public HorseDollItem(Supplier<EntityType<?>> defaultType, Settings settings)
+    public HorseDollItem(Supplier<EntityType<?>> defaultType, Properties settings)
     {
         super(defaultType, settings);
     }

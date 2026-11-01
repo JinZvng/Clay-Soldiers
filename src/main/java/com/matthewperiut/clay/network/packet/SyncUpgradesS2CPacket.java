@@ -17,16 +17,16 @@ public class SyncUpgradesS2CPacket {
 
     public SyncUpgradesS2CPacket(FriendlyByteBuf buf) {
         upgrades = new LinkedList<>();
-        int size = buf.readAccounted();
+        int size = buf.readInt();
         for (int i = 0; i < size; i++) {
-            upgrades.add(UpgradeManager.INSTANCE.getUpgrade(buf.readResourceLocation()));
+            upgrades.add(UpgradeManager.INSTANCE.getUpgrade(buf.readIdentifier()));
         }
     }
 
     public void write(FriendlyByteBuf buf) {
         buf.writeInt(upgrades.size());
         for (ISoldierUpgrade upgrade : upgrades) {
-            buf.writeResourceLocation(upgrade.getUpgradeIdentifier());
+            buf.writeIdentifier(upgrade.getUpgradeIdentifier());
         }
     }
 

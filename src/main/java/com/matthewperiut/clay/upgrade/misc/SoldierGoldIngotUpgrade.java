@@ -23,11 +23,11 @@ public class SoldierGoldIngotUpgrade implements ISoldierUpgrade {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return itemStack.isOf(Items.GOLD_INGOT) && !soldier.upgrades.contains(this);
+        return itemStack.is(Items.GOLD_INGOT) && !soldier.upgrades.contains(this);
     }
 
     @Override
-    public void pushNewPack(SoldierDollEntity soldier) {
+    public void onAdd(SoldierDollEntity soldier) {
 
     }
 

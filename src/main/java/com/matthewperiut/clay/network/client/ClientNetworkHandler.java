@@ -21,7 +21,7 @@ public class ClientNetworkHandler {
                         return;
                     SoldierUpgradeContainer container = optionalSoldier.get();
                     container.soldier.upgrades.add(container.upgrade);
-                    container.upgrade.pushNewPack(container.soldier);
+                    container.upgrade.onAdd(container.soldier);
                 }
             } else if (buf.action() == SyncUpgradesPayload.Action.REMOVE) {
                 List<ISoldierUpgrade> upgrades = buf.upgrades();

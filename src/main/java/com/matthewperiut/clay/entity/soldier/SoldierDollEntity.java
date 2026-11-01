@@ -4,6 +4,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
@@ -32,7 +35,7 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -76,7 +79,7 @@ import static com.matthewperiut.clay.registry.TeamRegistry.CLAY_TEAM;
 
 public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, EntitySpawnExtension {
     public static final Identifier TEXTURE_ID = Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "textures/entity/soldier/lightgray.png");
-    private final AnimatableInstanceCache animationCache = GeckoLibUtil.createCache(this);
+    private final AnimatableInstanceCache animationCache = GeckoLibUtil.createInstanceCache(this);
     public HashSet<ISoldierUpgrade> upgrades = new HashSet<>();
     public HashMap<ISoldierUpgrade, UpgradeInstance> upgradeInstances = new HashMap<>();
     public Queue<ISoldierUpgrade> removeUpgrades = new LinkedList<>();
@@ -87,6 +90,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
 
     public SoldierDollEntity(EntityType<? extends PathfinderMob> type, Level worldIn) {
         super(type, worldIn);
+        setPersistenceRequired();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -107,10 +111,10 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     }
 
     private PlayState attackPredicate(AnimationTest<SoldierDollEntity> event) {
-        if (this.swinging) {
-            event.controller().forceAnimationReset();
+        if (this.swingTime > 0) {
+            event.controller().reset();
             event.controller().setAnimation(RawAnimation.begin().thenPlay("animation.clay_soldier.attack"));
-            this.swinging = false;
+            
             return PlayState.STOP;
         }
         return PlayState.CONTINUE;
@@ -129,20 +133,12 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
         return animationCache;
     }
 
-    @Override
-    public InteractionResult interactAt(Player player, Vec3 hitPos, InteractionHand hand) {
-        if (hand == InteractionHand.MAIN_HAND) {
-            this.isAnimating = !this.isAnimating;
-        }
-        return super.interactAt(player, hitPos, hand);
-    }
-
     protected void selectTargets() {
-        this.targetSelector.add(3, new SoldierAIFindTarget.PlayerRideable(this, EntityTypeTest.forClass(HorseDollEntity.class)));
-        this.targetSelector.add(3, new SoldierAIFindTarget.Upgrade(this, EntityTypeTest.forClass(ItemEntity.class)));
-        targetSelector.add(4, new NearestAttackableTargetGoal<>(this, SoldierDollEntity.class, true, (e) -> {
+        this.targetSelector.addGoal(3, new SoldierAIFindTarget.PlayerRideable(this, EntityTypeTest.forClass(HorseDollEntity.class)));
+        this.targetSelector.addGoal(3, new SoldierAIFindTarget.Upgrade(this, EntityTypeTest.forClass(ItemEntity.class)));
+        targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, SoldierDollEntity.class, true, (e, world) -> {
             if (e instanceof SoldierDollEntity target) {
-                return !target.getTeam().isinSameTeam(this.getTeam().getTeamId());
+                return !target.getSoldierTeam().isinSameTeam(this.getSoldierTeam().getTeamId());
             }
             return false;
         }));
@@ -150,54 +146,51 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.add(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.add(5, new RandomLookAroundGoal(this));
-        this.goalSelector.add(4, new WaterAvoidingRandomStrollGoal(this, 1, 1));
-        this.goalSelector.add(3, new MeleeAttackTinyGoal(this, 1, false));
-        this.goalSelector.add(2, new SoliderAIFollowTarget.PlayerRideable(this, 1));
-        this.goalSelector.add(2, new SoliderAIFollowTarget.Upgrade(this, 1));
-        this.goalSelector.add(1, new FloatGoal(this));
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1, 1));
+        this.goalSelector.addGoal(3, new MeleeAttackTinyGoal(this, 1, false));
+        this.goalSelector.addGoal(2, new SoliderAIFollowTarget.PlayerRideable(this, 1));
+        this.goalSelector.addGoal(2, new SoliderAIFollowTarget.Upgrade(this, 1));
+        this.goalSelector.addGoal(1, new FloatGoal(this));
 
         selectTargets(); // priority 3
 
         super.registerGoals();
     }
 
-    @Override
-    public double getTick(Object o) {
-        return age;
-    }
+
 
     @Override
     protected SoundEvent getHurtSound(DamageSource src) {
-        return SoundEvents.GRAVEL_BREAK;
+        return SoundEvents.GRAVEL_BREAK.value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.GRAVEL_STEP;
+        return SoundEvents.GRAVEL_STEP.value();
     }
 //region EVENTS
 
     @Override
     public void die(DamageSource damageSource) {
-        if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).kill();
+        if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).discard();
         if (damageSource.getType().equals(this.level().damageSources().inFire().getType()) || (damageSource.getType().equals(this.level().damageSources().lava().getType())))
-            level().spawnEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER, 1)));
+            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get(), 1)));
         for (ISoldierUpgrade upgrade : upgrades) {
-            level().spawnEntity(new ItemEntity(level(), getX(), getY(), getZ(), upgrade.getUpgradeItem()));
+            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), upgrade.getUpgradeItem()));
         }
         super.die(damageSource);
     }
 
     @Override
-    public void onAttacking(Entity target) {
-        super.onAttacking(target);
+    public void onAttack(Entity target) {
+        super.onAttack(target);
 
         if (target instanceof SoldierDollEntity targetSoldier) {
             this.upgrades.forEach(u -> u.onAttack(targetSoldier, this));
             ISoldierUpgrade upgrade;
-            while ((upgrade = removeUpgrades.pop()) != null) {
+            while ((upgrade = removeUpgrades.poll()) != null) {
                 UpgradeManager.INSTANCE.removeUpgrade(this, upgrade);
             }
         }
@@ -211,12 +204,12 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     @Override
     public boolean skipAttackInteraction(Entity attacker) {
         if (attacker instanceof Player) {
-            kill();
+            discard();
         }
         if (attacker instanceof SoldierDollEntity attackerSoldier) {
             this.upgrades.forEach(u -> u.doPostHurtEffects(attackerSoldier, this));
             ISoldierUpgrade upgrade;
-            while ((upgrade = removeUpgrades.pop()) != null) {
+            while ((upgrade = removeUpgrades.poll()) != null) {
                 UpgradeManager.INSTANCE.removeUpgrade(this, upgrade);
             }
         }
@@ -225,9 +218,9 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
+    public boolean doHurtTarget(ServerLevel world, Entity target) {
         swing(InteractionHand.MAIN_HAND);
-        return super.tryAttack(target);
+        return super.doHurtTarget(world, target);
     }
 //endregion EVENTS
 
@@ -251,38 +244,40 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
         return false;
     }
 
-    public ITeam getTeam() {
-        return team;
+    public ITeam getSoldierTeam() {
+        return team == null ? CLAY_TEAM.get() : team;
     }
 
-    public void setTeam(@NotNull ITeam team) {
+    public void setSoldierTeam(@NotNull ITeam team) {
         this.team = team;
     }
 
     //region SYNC
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        short teamId = nbt.getShort(NBT_IDENTIFIER);
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        CompoundTag nbt = input.read("ClayData", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+        short teamId = nbt.getShort(NBT_IDENTIFIER).orElse((short) 0);
         Optional<Map.Entry<ResourceKey<ITeam>, ITeam>> teamOptional = TeamRegistry.SOLDIER_TEAMS.entrySet()
                 .stream()
                 .filter(t -> t.getValue().isinSameTeam(teamId))
-                .findClosest();
-        setTeam(teamOptional.map(Map.Entry::getValue).orElse(CLAY_TEAM.get()));
+                .findFirst();
+        setSoldierTeam(teamOptional.map(Map.Entry::getValue).orElse(CLAY_TEAM.get()));
 
-        ListTag nbtListForUpgrades = nbt.getList(NBTValues.SOLDIER_UPGRADES.getKey(), Tag.TAG_COMPOUND);
+        ListTag nbtListForUpgrades = nbt.getListOrEmpty(NBTValues.SOLDIER_UPGRADES.getKey());
         for (int i = 0; i < nbtListForUpgrades.size(); i++) {
-            CompoundTag nbtCompound = nbtListForUpgrades.getCompound(i);
-            Identifier id = Identifier.parse(nbtCompound.getString(NBTValues.SOLDIER_UPGRADES_ID.getKey()));
+            CompoundTag nbtCompound = nbtListForUpgrades.getCompoundOrEmpty(i);
+            Identifier id = Identifier.parse(nbtCompound.getString(NBTValues.SOLDIER_UPGRADES_ID.getKey()).orElse(""));
             UpgradeManager.INSTANCE.handleNBTRead(this, id, nbtCompound);
         }
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-        nbt.putShort(NBT_IDENTIFIER, getTeam().getTeamId());
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        CompoundTag nbt = new CompoundTag();
+        nbt.putShort(NBT_IDENTIFIER, getSoldierTeam().getTeamId());
         ListTag nbtListForUpgrades = new ListTag();
         for (ISoldierUpgrade upgrade : this.upgrades) {
             CompoundTag nbtTag = new CompoundTag();
@@ -290,6 +285,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
             nbtListForUpgrades.add(nbtTag);
         }
         nbt.put(NBTValues.SOLDIER_UPGRADES.getKey(), nbtListForUpgrades);
+        output.store("ClayData", CompoundTag.CODEC, nbt);
     }
 
     @Override
@@ -302,7 +298,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     public void loadAdditionalSpawnData(FriendlyByteBuf buf) {
         SyncUpgradesS2CPacket syncUpgradeData = new SyncUpgradesS2CPacket(buf);
         this.upgrades = new HashSet<>(syncUpgradeData.getUpgrades());
-        this.upgrades.forEach(u -> u.pushNewPack(this));
+        this.upgrades.forEach(u -> u.onAdd(this));
     }
 //endregion SYNC
 
@@ -334,8 +330,8 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide() && age % 20 == 0) {
-            if(getMainHandStack().isOf(Items.STICK)) {
+        if (!level().isClientSide() && tickCount % 20 == 0) {
+            if(getMainHandItem().is(Items.STICK)) {
                 entityData.set(HAS_STICK, true);
             }
         }

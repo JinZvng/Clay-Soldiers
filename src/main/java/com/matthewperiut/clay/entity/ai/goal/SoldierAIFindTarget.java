@@ -44,7 +44,7 @@ public abstract class SoldierAIFindTarget<T extends Entity> extends Goal {
             return;
         }
         decrementTravelTime = 20;
-        AABB box = new AABB(this.soldier.getPos().subtract(8, 4, 8), this.soldier.getPos().add(8, 4, 8));
+        AABB box = new AABB(this.soldier.position().subtract(8, 4, 8), this.soldier.position().add(8, 4, 8));
 
         Level world = this.soldier.level();
 
@@ -83,7 +83,7 @@ public abstract class SoldierAIFindTarget<T extends Entity> extends Goal {
 
         @Override
         protected boolean isTargetable(ItemEntity searchTarget) {
-            return UpgradeManager.INSTANCE.canApplyUpdate(soldier, searchTarget.getStack());
+            return UpgradeManager.INSTANCE.canApplyUpdate(soldier, searchTarget.getItemInHand());
         }
 
         @Override

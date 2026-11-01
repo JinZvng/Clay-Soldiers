@@ -17,7 +17,7 @@ public class LivingEntityEventManager {
                     upgrade.onKill(dyingSoldier, attackingSoldier);
                 }
                 ISoldierUpgrade upgrade;
-                while ((upgrade = attackingSoldier.removeUpgrades.pop()) != null) {
+                while ((upgrade = attackingSoldier.removeUpgrades.poll()) != null) {
                     UpgradeManager.INSTANCE.removeUpgrade(attackingSoldier, upgrade);
                 }
             }

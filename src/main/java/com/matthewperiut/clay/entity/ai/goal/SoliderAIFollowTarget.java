@@ -17,7 +17,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
     protected double speed;
 
     public SoliderAIFollowTarget(SoldierDollEntity soldier, double speed) {
-        this.setFlags(EnumSet.of(Control.MOVE, Control.LOOK));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
         this.soldier = soldier;
         this.speed = speed;
     }
@@ -32,7 +32,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
     public void tick() {
         Entity target = getTarget();
         this.soldier.getLookControl().lookAt(target, 30.0F, 30.0F);
-        double distanceToTarget = this.soldier.squaredDistanceTo(target.getX(), target.getY(), target.getZ());
+        double distanceToTarget = this.soldier.distanceToSqr(target.getX(), target.getY(), target.getZ());
         if (this.soldier.getRandom().nextFloat() < 0.25F) {
             this.soldier.getNavigation().startMovingTo(target, this.speed);
         }
@@ -95,10 +95,10 @@ public abstract class SoliderAIFollowTarget extends Goal {
         void action(double distanceToTarget) {
             if (distanceToTarget <= 2) {
                 ItemEntity target = getTarget();
-                UpgradeManager.INSTANCE.applyUpdate(soldier, target.getStack());
-                target.getStack().shrink(1);
+                UpgradeManager.INSTANCE.applyUpdate(soldier, target.getItemInHand());
+                target.getItemInHand().shrink(1);
                 soldier.level().playSound(null, soldier.getX(), soldier.getY(), soldier.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((soldier.getRandom().nextFloat() - soldier.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                if (target.getStack().getCount() == 0) {
+                if (target.getItemInHand().getCount() == 0) {
                     target.makeFakeItem();
                 }
                 cleanUp();
@@ -114,7 +114,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
 
         @Override
         boolean hasValidTarget() {
-            return getTarget() != null && getTarget().getStack().getCount() >= 1;
+            return getTarget() != null && getTarget().getItemInHand().getCount() >= 1;
         }
 
         @Override

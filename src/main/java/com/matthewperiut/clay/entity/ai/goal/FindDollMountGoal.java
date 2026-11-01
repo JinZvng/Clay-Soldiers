@@ -21,7 +21,7 @@ public class FindDollMountGoal extends Goal
 
     public FindDollMountGoal(SoldierDollEntity mob, double speed)
     {
-        this.setFlags(EnumSet.of(Control.MOVE));
+        this.setFlags(EnumSet.of(Flag.MOVE));
         this.mob = mob;
         this.speed = speed;
     }
@@ -30,7 +30,7 @@ public class FindDollMountGoal extends Goal
     {
         Level world = this.mob.level();
 
-        AABB box = new AABB(this.mob.getPos().subtract(8, 4, 8), this.mob.getPos().add(8, 4, 8));
+        AABB box = new AABB(this.mob.position().subtract(8, 4, 8), this.mob.position().add(8, 4, 8));
 
         List<HorseDollEntity> horses = world.getEntitiesOfClass(HorseDollEntity.class, box, (horse) -> !horse.isVehicle());
 
@@ -44,7 +44,7 @@ public class FindDollMountGoal extends Goal
             {
                 return horse;
             }
-            double d = this.mob.squaredDistanceTo(horse.getX(), horse.getY(), horse.getZ());
+            double d = this.mob.distanceToSqr(horse.getX(), horse.getY(), horse.getZ());
             if (d < distance)
             {
                 chosen = horse;
@@ -64,7 +64,7 @@ public class FindDollMountGoal extends Goal
             return false;
         }
 
-        long currentWorldTime = this.mob.level().getTime();
+        long currentWorldTime = this.mob.level().getGameTime();
         if (currentWorldTime - this.lastUpdateTime < 20L)
         {
             return false;
@@ -89,7 +89,7 @@ public class FindDollMountGoal extends Goal
                 }
                 else
                 {
-                    return this.getSquaredMaxRideDistance(this.target) >= this.mob.squaredDistanceTo(this.target.getX(), this.target.getY(), this.target.getZ());
+                    return this.getSquaredMaxRideDistance(this.target) >= this.mob.distanceToSqr(this.target.getX(), this.target.getY(), this.target.getZ());
                 }
             }
         }
@@ -116,7 +116,7 @@ public class FindDollMountGoal extends Goal
         } else if (this.target.isVehicle())
         {
             return false;
-        } else return this.mob.isWithinRestriction(this.target.getBlockPos());
+        } else return this.mob.isWithinRestriction(this.target.blockPosition());
     }
 
     @Override
@@ -141,7 +141,7 @@ public class FindDollMountGoal extends Goal
         if (goalMob != null)
         {
             this.mob.getLookControl().lookAt(goalMob, 30.0F, 30.0F);
-            double d = this.mob.squaredDistanceTo(goalMob.getX(), goalMob.getY(), goalMob.getZ());
+            double d = this.mob.distanceToSqr(goalMob.getX(), goalMob.getY(), goalMob.getZ());
 
             if (this.mob.getRandom().nextFloat() < 0.25F)
             {

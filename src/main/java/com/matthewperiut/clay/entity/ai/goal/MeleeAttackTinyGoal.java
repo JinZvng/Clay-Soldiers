@@ -27,12 +27,12 @@ public class MeleeAttackTinyGoal extends Goal
         this.mob = mob;
         this.speed = speed;
         this.followingTargetEvenIfNotSeen = followingTargetEvenIfNotSeen;
-        this.setFlags(EnumSet.of(Control.MOVE, Control.LOOK));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     public boolean canUse()
     {
-        long l = this.mob.level().getTime();
+        long l = this.mob.level().getGameTime();
         if (l - this.lastUpdateTime < 20L)
         {
             return false;
@@ -58,7 +58,7 @@ public class MeleeAttackTinyGoal extends Goal
                 }
                 else
                 {
-                    return this.getSquaredMaxAttackDistance(livingEntity) >= this.mob.squaredDistanceTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+                    return this.getSquaredMaxAttackDistance(livingEntity) >= this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
                 }
             }
         }
@@ -75,7 +75,7 @@ public class MeleeAttackTinyGoal extends Goal
         {
             return false;
         }
-        else if (!this.mob.isWithinRestriction(livingEntity.getBlockPos()))
+        else if (!this.mob.isWithinRestriction(livingEntity.blockPosition()))
         {
             return false;
         }
@@ -88,7 +88,7 @@ public class MeleeAttackTinyGoal extends Goal
     public void start()
     {
         this.mob.getNavigation().moveTo(this.path, this.speed);
-        this.mob.setAttacking(true);
+        this.mob.setAggressive(true);
     }
 
     public void stop()
@@ -99,7 +99,7 @@ public class MeleeAttackTinyGoal extends Goal
             this.mob.setTarget(null);
         }
 
-        this.mob.setAttacking(false);
+        this.mob.setAggressive(false);
         this.mob.getNavigation().stop();
     }
 
@@ -125,11 +125,11 @@ public class MeleeAttackTinyGoal extends Goal
         if (livingEntity != null)
         {
             this.mob.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
-            double d = this.mob.squaredDistanceTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
+            double d = this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
             if ((this.mob.getSensing().canSee(livingEntity)))
             {
                 this.mob.getNavigation().startMovingTo(livingEntity, this.speed);
-                pushTowardOther(livingEntity.getPos().subtract(this.mob.getPos()), 0.0125);
+                pushTowardOther(livingEntity.position().subtract(this.mob.position()), 0.0125);
             }
 
             this.attack(livingEntity, d);

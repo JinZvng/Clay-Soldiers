@@ -22,23 +22,23 @@ public class DollDispenserBehavior implements DispenseItemBehavior
     public static DollDispenserBehavior DOLL_DISPENSE = new DollDispenserBehavior();
 
     @Override
-    public ItemStack dispenseFrom(BlockSource pointer, ItemStack stack)
+    public ItemStack dispense(BlockSource pointer, ItemStack stack)
     {
         if (stack.getItem() instanceof SpawnDollItem doll)
         {
-            ServerLevel world = pointer.world();
+            ServerLevel world = pointer.level();
             BlockPos pos = pointer.pos();
             DispenserBlockEntity dispenserEntity = pointer.blockEntity();
-            BlockState dispenserBlock = world.getBlockState(dispenserEntity.getPos());
-            Direction direction = dispenserBlock.get(BlockStateProperties.FACING);
-            BlockPos spawnPos = pos.add(new Vec3i(direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ()));
+            BlockState dispenserBlock = world.getBlockState(dispenserEntity.getBlockPos());
+            Direction direction = dispenserBlock.getValue(BlockStateProperties.FACING);
+            BlockPos spawnPos = pos.relative(direction);
 
             EntityType<?> entityType = ((SpawnDollItem)stack.getItem()).getEntityType();
             Entity e = entityType.spawn(world, stack, null, spawnPos, EntitySpawnReason.DISPENSER, false, false);
             if (e != null)
             {
-                world.playSound(null, pos, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
-                world.gameEvent(GameEvent.ENTITY_PLACE, spawnPos, GameEvent.Emitter.of(e));
+                world.playSound(null, pos, SoundEvents.GRAVEL_BREAK.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+                world.gameEvent(GameEvent.ENTITY_PLACE, spawnPos, GameEvent.Context.of(e));
                 stack.setCount(stack.getCount() - 1);
             }
         }

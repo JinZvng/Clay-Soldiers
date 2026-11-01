@@ -15,7 +15,7 @@ public class DisruptorDispenserBehavior extends OptionalDispenseItemBehavior
 {
     protected ItemStack execute(BlockSource pointer, ItemStack stack)
     {
-        Level world = pointer.world();
+        Level world = pointer.level();
 
         if (world.isClientSide()) {
             return stack;
@@ -27,7 +27,7 @@ public class DisruptorDispenserBehavior extends OptionalDispenseItemBehavior
             this.setSuccess(disruptor.killClayEntity(world, Vec3.ofCenter(pointer.pos())));
             if (this.isSuccess()) {
                 if (!disruptor.unlimited) {
-                    stack.damage(1, (ServerLevel) world, (ServerPlayer) null, i -> stack.setCount(0));
+                    stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) null, i -> stack.setCount(0));
 
                 }
             }

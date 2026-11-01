@@ -8,7 +8,7 @@ import dev.architectury.registry.CreativeTabRegistry;
 import dev.architectury.registry.registries.DeferredRegister;
 import dev.architectury.registry.registries.RegistrySupplier;
 
-import static net.minecraft.registry.RegistryKeys.ITEM_GROUP;
+import static net.minecraft.core.registries.Registries.CREATIVE_MODE_TAB;
 
 public class TabsRegistry {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(ClayMod.MOD_ID, CREATIVE_MODE_TAB);

@@ -7,18 +7,18 @@ import net.minecraft.world.entity.Entity;
 
 import io.netty.buffer.Unpooled;
 
-public class HttpUtil {
-    private HttpUtil() {
+public class NetworkUtils {
+    private NetworkUtils() {
     }
 
     public static Iterable<ServerPlayer> getTrackingPlayers(Entity entity) {
-        return ((ServerChunkCache) entity.level().getChunkSource()).chunkMap.getPlayersWatchingChunk(entity.getChunkPos(), false);
+        return ((ServerChunkCache) entity.level().getChunkSource()).chunkMap.getPlayers(entity.chunkPosition(), false);
     }
 
     public static FriendlyByteBuf getBufferForUpgrades(int entityId, Identifier upgradeIdentifier) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeInt(entityId);
-        buffer.writeResourceLocation(upgradeIdentifier);
+        buffer.writeIdentifier(upgradeIdentifier);
         return buffer;
     }
 }

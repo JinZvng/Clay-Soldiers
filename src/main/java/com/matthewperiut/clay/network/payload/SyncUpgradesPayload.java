@@ -33,7 +33,7 @@ public record SyncUpgradesPayload(int entityId, Action action, List<ISoldierUpgr
 
         @Override
         public Action decode(ByteBuf buf) {
-            return Action.values()[buf.readAccounted()];
+            return Action.values()[buf.readInt()];
         }
     };
 
@@ -51,10 +51,10 @@ public record SyncUpgradesPayload(int entityId, Action action, List<ISoldierUpgr
 
         @Override
         public List<ISoldierUpgrade> decode(ByteBuf byteBuf) {
-            int size = byteBuf.readAccounted(); // Read the size of the list
+            int size = byteBuf.readInt(); // Read the size of the list
             List<ISoldierUpgrade> upgrades = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                int identifierLength = byteBuf.readAccounted();
+                int identifierLength = byteBuf.readInt();
                 byte[] identifierBytes = new byte[identifierLength];
                 byteBuf.readBytes(identifierBytes);
                 String identifierStr = new String(identifierBytes, StandardCharsets.UTF_8);
@@ -68,16 +68,16 @@ public record SyncUpgradesPayload(int entityId, Action action, List<ISoldierUpgr
         }
     };
 
-    public static final CustomPacketPayload.Id<SyncUpgradesPayload> ID = new CustomPacketPayload.Id<>(ClayNetworkingConstants.SYNC_UPGRADES_PACKET_ID);
+    public static final CustomPacketPayload.Type<SyncUpgradesPayload> ID = new CustomPacketPayload.Type<>(ClayNetworkingConstants.SYNC_UPGRADES_PACKET_ID);
      public static final StreamCodec<RegistryFriendlyByteBuf, SyncUpgradesPayload> CODEC = StreamCodec.composite(
-        ByteBufCodecs.INTEGER, SyncUpgradesPayload::entityId,
+        ByteBufCodecs.INT, SyncUpgradesPayload::entityId,
         ACTION_CODEC, SyncUpgradesPayload::action,
         UPGRADES_CODEC, SyncUpgradesPayload::upgrades,
         SyncUpgradesPayload::new
      );
 
     @Override
-    public CustomPacketPayload.Id<? extends CustomPacketPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

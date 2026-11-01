@@ -47,12 +47,12 @@ public class SoldierWoolUpgrade implements ISoldierUpgrade {
     }
 
     @Override
-    public void pushNewPack(SoldierDollEntity soldier) {
+    public void onAdd(SoldierDollEntity soldier) {
         if (soldier.level().isClientSide()) return;
 
         soldier.playSound(SoundEvents.WOOL_PLACE);
 
-        AttributeInstance armorInstance = soldier.getAttributeInstance(Attributes.ARMOR);
+        AttributeInstance armorInstance = soldier.getAttribute(Attributes.ARMOR);
         AttributeModifier attributeModifier = new AttributeModifier(SOLDIER_WOOL_UPGRADE, 2, AttributeModifier.Operation.ADD_VALUE);
         if (armorInstance != null && !armorInstance.hasModifier(attributeModifier.id())) {
             armorInstance.addPermanentModifier(attributeModifier);
@@ -63,7 +63,7 @@ public class SoldierWoolUpgrade implements ISoldierUpgrade {
     public void onRemove(SoldierDollEntity soldier) {
         if (soldier.level().isClientSide()) return;
 
-        AttributeInstance armorInstance = soldier.getAttributeInstance(Attributes.ARMOR);
+        AttributeInstance armorInstance = soldier.getAttribute(Attributes.ARMOR);
         if (armorInstance != null)
             armorInstance.removeModifier(SOLDIER_WOOL_UPGRADE);
     }

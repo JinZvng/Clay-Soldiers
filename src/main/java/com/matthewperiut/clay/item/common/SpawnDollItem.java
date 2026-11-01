@@ -35,32 +35,32 @@ import static com.matthewperiut.clay.registry.TeamRegistry.CLAY_TEAM;
 public class SpawnDollItem extends Item {
     public ArrayList<Supplier<EntityType<?>>> types;
 
-    public SpawnDollItem(ArrayList<Supplier<EntityType<?>>> types, Settings settings) {
+    public SpawnDollItem(ArrayList<Supplier<EntityType<?>>> types, Properties settings) {
         super(settings);
         this.types = types;
     }
 
-    public SpawnDollItem(Supplier<EntityType<?>> defaultType, Settings settings) {
+    public SpawnDollItem(Supplier<EntityType<?>> defaultType, Properties settings) {
         super(settings);
         this.types = new ArrayList<>();
         types.add(defaultType);
     }
 
     public InteractionResult useOn(UseOnContext context) {
-        Level world = context.level();
+        Level world = context.getLevel();
         if (!(world instanceof ServerLevel)) {
             return InteractionResult.SUCCESS;
         } else {
-            ItemStack itemStack = context.getStack();
-            BlockPos blockPos = context.getBlockPos();
-            Direction direction = context.getSide();
+            ItemStack itemStack = context.getItemInHand();
+            BlockPos blockPos = context.getClickedPos();
+            Direction direction = context.getClickedFace();
             BlockState blockState = world.getBlockState(blockPos);
 
             BlockPos blockPos2;
             if (blockState.getCollisionShape(world, blockPos).isEmpty()) {
                 blockPos2 = blockPos;
             } else {
-                blockPos2 = blockPos.offset(direction);
+                blockPos2 = blockPos.relative(direction);
             }
 
             int count = itemStack.getCount();
@@ -77,24 +77,24 @@ public class SpawnDollItem extends Item {
 
                 itemStack.shrink(1);
                 world.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
-                world.playSound(context.getPlayer(), blockPos, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.f, 1.f);
+                world.playSound(context.getPlayer(), blockPos, SoundEvents.GRAVEL_BREAK.value(), SoundSource.BLOCKS, 1.f, 1.f);
 
                 if (entity instanceof SoldierDollEntity soldier) {
-                    soldier.setTeam(team);
+                    soldier.setSoldierTeam(team);
                 }
             }
 
-            return InteractionResult.CONSUME;
+            return InteractionResult.SUCCESS;
         }
     }
 
     public ITeam getTeam(ItemStack stack) {
-        Optional<Map.Entry<ResourceKey<ITeam>, ITeam>> teamOptional = TeamRegistry.SOLDIER_TEAMS.entrySet().stream().filter(entry -> stack.isOf(entry.getValue().getTeamItem().getItem())).findClosest();
+        Optional<Map.Entry<ResourceKey<ITeam>, ITeam>> teamOptional = TeamRegistry.SOLDIER_TEAMS.entrySet().stream().filter(entry -> stack.is(entry.getValue().getTeamItem().getItem())).findFirst();
         return teamOptional.map(Map.Entry::getValue).orElse(CLAY_TEAM.get());
     }
 
     public EntityType<?> getEntityType() {
-        int selected = RandomSource.createNewThreadLocalInstance().nextBetween(0, types.size() - 1);
+        int selected = RandomSource.create().nextInt(types.size());
         return types.get(selected).get();
     }
 }

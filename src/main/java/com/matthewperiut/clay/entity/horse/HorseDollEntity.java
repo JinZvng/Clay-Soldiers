@@ -35,11 +35,12 @@ import com.geckolib.util.GeckoLibUtil;
 
 public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
 {
-    private AnimatableInstanceCache factory = GeckoLibUtil.createCache(this);
+    private AnimatableInstanceCache factory = GeckoLibUtil.createInstanceCache(this);
 
     public HorseDollEntity(EntityType<? extends PathfinderMob> entityType, Level world)
     {
         super(entityType, world);
+        setPersistenceRequired();
     }
 
     public static AttributeSupplier.Builder setAttributesBuilder()
@@ -78,36 +79,32 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     @Override
     protected void registerGoals()
     {
-        this.goalSelector.add(0, new FloatGoal(this));
-        this.goalSelector.add(1, new PanicGoal(this, 1.0));
-        this.goalSelector.add(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
-        this.goalSelector.add(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.add(8, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.0));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         super.registerGoals();
     }
 
-    @Override
-    public double getTick(Object o)
-    {
-        return age;
-    }
+
 
     @Override
     protected SoundEvent getHurtSound(DamageSource src)
     {
-        return SoundEvents.GRAVEL_BREAK;
+        return SoundEvents.GRAVEL_BREAK.value();
     }
 
     @Override
     protected SoundEvent getDeathSound()
     {
-        return SoundEvents.GRAVEL_STEP;
+        return SoundEvents.GRAVEL_STEP.value();
     }
 
     @Override
     public boolean skipAttackInteraction(Entity attacker)
     {
-        if (attacker instanceof Player) kill();
+        if (attacker instanceof Player) discard();
         return super.skipAttackInteraction(attacker);
     }
 
@@ -115,7 +112,7 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     public void die(DamageSource damageSource)
     {
         if (damageSource.getType().equals(this.level().damageSources().inFire().getType()) || damageSource.getType().equals(this.level().damageSources().lava().getType()))
-            level().spawnEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_HORSE, 1)));
+            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_HORSE.get(), 1)));
         super.die(damageSource);
     }
 

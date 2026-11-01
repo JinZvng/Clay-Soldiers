@@ -41,14 +41,14 @@ public class SoldierStickUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return !soldier.upgrades.contains(this) && itemStack.isOf(Items.STICK);
+        return !soldier.upgrades.contains(this) && itemStack.is(Items.STICK);
     }
 
     @Override
-    public void pushNewPack(SoldierDollEntity soldier) {
+    public void onAdd(SoldierDollEntity soldier) {
         soldier.upgradeInstances.get(this).nbtCompound().putShort(IDurable.NBT_KEY, durability);
         soldier.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.STICK, 1));
-        AttributeInstance attackInstance = soldier.getAttributeInstance(Attributes.ATTACK_DAMAGE);
+        AttributeInstance attackInstance = soldier.getAttribute(Attributes.ATTACK_DAMAGE);
         AttributeModifier attributeModifier = new AttributeModifier(SOLDIER_STICK_UPGRADE, 2, AttributeModifier.Operation.ADD_VALUE);
         if (attackInstance != null && !attackInstance.hasModifier(attributeModifier.id()))
             attackInstance.addPermanentModifier(attributeModifier);
@@ -57,11 +57,11 @@ public class SoldierStickUpgrade implements ISoldierUpgrade, IDurable {
     @Override
     public void onRemove(SoldierDollEntity soldier) {
         soldier.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-        AttributeInstance attackInstance = soldier.getAttributeInstance(Attributes.ATTACK_DAMAGE);
+        AttributeInstance attackInstance = soldier.getAttribute(Attributes.ATTACK_DAMAGE);
         if (attackInstance != null)
             attackInstance.removeModifier(SOLDIER_STICK_UPGRADE);
         if (getUses(soldier) <= 0)
-            soldier.playSound(SoundEvents.ITEM_BREAK);
+            soldier.playSound(SoundEvents.ITEM_BREAK.value());
     }
 
     @Override
@@ -90,6 +90,6 @@ public class SoldierStickUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public short getUses(SoldierDollEntity soldier) {
-        return soldier.upgradeInstances.get(this).nbtCompound().getShort(IDurable.NBT_KEY);
+        return soldier.upgradeInstances.get(this).nbtCompound().getShort(IDurable.NBT_KEY).orElse((short) 0);
     }
 }
