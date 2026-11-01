@@ -71,13 +71,13 @@ public class SpawnDollItem extends Item {
                 if (types.size() > 1) {
                     entityType = this.getEntityType();
                 }
-                Entity entity = entityType.spawn((ServerLevel) world, itemStack, context.getPlayer(), blockPos2, EntitySpawnReason.SPAWN_EGG, false, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP);
+                Entity entity = entityType.spawn((ServerLevel) world, itemStack, context.getPlayer(), blockPos2, EntitySpawnReason.SPAWN_ITEM_USE, false, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP);
 
                 if (entity == null) continue;
 
                 itemStack.shrink(1);
                 world.gameEvent(context.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
-                world.playSound(context.getPlayer(), blockPos, SoundEvents.GRAVEL_BREAK.value(), SoundSource.BLOCKS, 1.f, 1.f);
+                world.playSound(context.getPlayer(), blockPos, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.f, 1.f);
 
                 if (entity instanceof SoldierDollEntity soldier) {
                     soldier.setSoldierTeam(team);

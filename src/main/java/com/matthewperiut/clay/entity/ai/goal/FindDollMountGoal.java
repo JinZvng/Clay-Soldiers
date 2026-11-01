@@ -116,7 +116,7 @@ public class FindDollMountGoal extends Goal
         } else if (this.target.isVehicle())
         {
             return false;
-        } else return this.mob.isWithinRestriction(this.target.blockPosition());
+        } else return this.mob.isWithinHome(this.target.blockPosition());
     }
 
     @Override
@@ -140,12 +140,12 @@ public class FindDollMountGoal extends Goal
         HorseDollEntity goalMob = this.target;
         if (goalMob != null)
         {
-            this.mob.getLookControl().lookAt(goalMob, 30.0F, 30.0F);
+            this.mob.getLookControl().setLookAt(goalMob, 30.0F, 30.0F);
             double d = this.mob.distanceToSqr(goalMob.getX(), goalMob.getY(), goalMob.getZ());
 
             if (this.mob.getRandom().nextFloat() < 0.25F)
             {
-                this.mob.getNavigation().startMovingTo(goalMob, this.speed);
+                this.mob.getNavigation().moveTo(goalMob, this.speed);
             }
 
             if (this.mob.getRandom().nextFloat() < 0.05f)
@@ -166,7 +166,7 @@ public class FindDollMountGoal extends Goal
         {
             if (canContinueToUse())
             {
-                if (target.age > 40) this.mob.startRiding(target);
+                if (target.tickCount > 40) this.mob.startRiding(target);
             }
         }
     }
@@ -178,7 +178,7 @@ public class FindDollMountGoal extends Goal
 
     protected void resetCooldown()
     {
-        this.cooldown = this.getTickCount(20);
+        this.cooldown = this.adjustedTickDelay(20);
     }
 
     protected boolean isTimeToAttack()
@@ -193,6 +193,6 @@ public class FindDollMountGoal extends Goal
 
     protected int getAttackInterval()
     {
-        return this.getTickCount(20);
+        return this.adjustedTickDelay(20);
     }
 }

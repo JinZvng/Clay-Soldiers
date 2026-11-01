@@ -89,7 +89,7 @@ public class SoldierLeatherUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public void readCustomNBTData(SoldierDollEntity soldier, CompoundTag nbt) {
-        soldier.upgradeInstances.get(this).nbtCompound().copyFrom(nbt);
+        soldier.upgradeInstances.get(this).nbtCompound().merge(nbt);
     }
 
     @Override

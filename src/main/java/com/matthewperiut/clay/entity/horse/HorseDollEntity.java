@@ -92,13 +92,13 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     @Override
     protected SoundEvent getHurtSound(DamageSource src)
     {
-        return SoundEvents.GRAVEL_BREAK.value();
+        return SoundEvents.GRAVEL_BREAK;
     }
 
     @Override
     protected SoundEvent getDeathSound()
     {
-        return SoundEvents.GRAVEL_STEP.value();
+        return SoundEvents.GRAVEL_STEP;
     }
 
     @Override
@@ -111,17 +111,10 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     @Override
     public void die(DamageSource damageSource)
     {
-        if (damageSource.getType().equals(this.level().damageSources().inFire().getType()) || damageSource.getType().equals(this.level().damageSources().lava().getType()))
+        if (damageSource.type().equals(this.level().damageSources().inFire().type()) || damageSource.type().equals(this.level().damageSources().lava().type()))
             level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_HORSE.get(), 1)));
         super.die(damageSource);
     }
 
-    @Override
-    public boolean requiresCustomPersistence()
-    {
-        if (this instanceof ISpawnReasonExtension) {
-            return ((ISpawnReasonExtension) this).clay$getSpawnReason() == EntitySpawnReason.SPAWN_EGG;
-        }
-        return super.requiresCustomPersistence();
-    }
+
 }

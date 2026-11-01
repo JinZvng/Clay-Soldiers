@@ -12,7 +12,7 @@ public class LivingEntityEventManager {
 
     public static void register() {
         EntityEvent.LIVING_DEATH.register((LivingEntity dyingEntity, DamageSource source) -> {
-            if (dyingEntity instanceof SoldierDollEntity dyingSoldier && source.getAttacker() instanceof SoldierDollEntity attackingSoldier) {
+            if (dyingEntity instanceof SoldierDollEntity dyingSoldier && source.getEntity() instanceof SoldierDollEntity attackingSoldier) {
                 for (ISoldierUpgrade upgrade : attackingSoldier.upgrades) {
                     upgrade.onKill(dyingSoldier, attackingSoldier);
                 }

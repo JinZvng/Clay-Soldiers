@@ -38,7 +38,7 @@ public class SoldierGoldIngotUpgrade implements ISoldierUpgrade {
 
     @Override
     public void die(DamageSource source, SoldierDollEntity soldier) {
-        if (source.getAttacker() instanceof SoldierDollEntity) {
+        if (source.getEntity() instanceof SoldierDollEntity) {
             // REVENGE THE KING
         }
     }

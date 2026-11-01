@@ -20,14 +20,14 @@ public class PickUpUpgradesGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        return entity.getAttacker() == null;
+        return entity.getLastHurtByMob() == null;
     }
 
     @Override
     public void tick() {
-        List<ItemEntity> itemsNearby = entity.level().getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().expand(8.0, 8.0, 8.0), Entity::isGlowing);
+        List<ItemEntity> itemsNearby = entity.level().getEntitiesOfClass(ItemEntity.class, entity.getBoundingBox().inflate(8.0, 8.0, 8.0), Entity::isCurrentlyGlowing);
         if (!itemsNearby.isEmpty()) {
-            entity.getNavigation().startMovingTo(itemsNearby.get(entity.getRandom().nextBetween(0, itemsNearby.size() - 1)), 2);
+            entity.getNavigation().moveTo(itemsNearby.get(entity.getRandom().nextInt(itemsNearby.size())), 2);
         }
     }
 }

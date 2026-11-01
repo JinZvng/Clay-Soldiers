@@ -20,9 +20,7 @@ public class RenderRegistry {
                 EntityRendererRegistry.register(() -> (EntityType<? extends HorseDollEntity>) bundle.entityType.get(), ctx -> new HorseDollRenderer(ctx, bundle.textureID));
             }
         }
-        for (ClientInfoStorage.ColoredItemDataBundle bundle : ClientInfoStorage.coloredItemDataBundleList) {
-            ColorHandlerRegistry.registerItemColors((stack, tintIndex) -> bundle.color, bundle.item);
-        }
+
     }
 
 }

@@ -8,5 +8,5 @@ import com.matthewperiut.clay.ClayMod;
 
 public class ClayTag
 {
-    public static final TagKey<Item> SOLDIERS = TagKey.of(BuiltInRegistries.ITEM.getKey(), Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "soldiers"));
+    public static final TagKey<Item> SOLDIERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "soldiers"));
 }

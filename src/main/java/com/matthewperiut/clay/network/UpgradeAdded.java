@@ -14,6 +14,6 @@ import java.util.List;
 public class UpgradeAdded {
 
     public static void sendPacket(Iterable<ServerPlayer> players, int entityId, ISoldierUpgrade upgrade) {
-        NetworkManager.onChunkReadyToSend(players, new SyncUpgradesPayload(entityId, SyncUpgradesPayload.Action.ADD, List.of(upgrade)));
+        NetworkManager.sendToPlayers(players, new SyncUpgradesPayload(entityId, SyncUpgradesPayload.Action.ADD, List.of(upgrade)));
     }
 }

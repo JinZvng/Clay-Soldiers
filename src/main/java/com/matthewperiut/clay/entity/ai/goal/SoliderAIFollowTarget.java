@@ -31,10 +31,10 @@ public abstract class SoliderAIFollowTarget extends Goal {
     @Override
     public void tick() {
         Entity target = getTarget();
-        this.soldier.getLookControl().lookAt(target, 30.0F, 30.0F);
+        this.soldier.getLookControl().setLookAt(target, 30.0F, 30.0F);
         double distanceToTarget = this.soldier.distanceToSqr(target.getX(), target.getY(), target.getZ());
         if (this.soldier.getRandom().nextFloat() < 0.25F) {
-            this.soldier.getNavigation().startMovingTo(target, this.speed);
+            this.soldier.getNavigation().moveTo(target, this.speed);
         }
         action(distanceToTarget);
     }
@@ -79,7 +79,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
         @Override
         void action(double distanceToTarget) {
             Entity target = getTarget();
-            if (distanceToTarget <= 2 && target.age > 20) {
+            if (distanceToTarget <= 2 && target.tickCount > 20) {
                 soldier.startRiding(target);
                 cleanUp();
             }
@@ -95,10 +95,10 @@ public abstract class SoliderAIFollowTarget extends Goal {
         void action(double distanceToTarget) {
             if (distanceToTarget <= 2) {
                 ItemEntity target = getTarget();
-                UpgradeManager.INSTANCE.applyUpdate(soldier, target.getItemInHand());
-                target.getItemInHand().shrink(1);
+                UpgradeManager.INSTANCE.applyUpdate(soldier, target.getItem());
+                target.getItem().shrink(1);
                 soldier.level().playSound(null, soldier.getX(), soldier.getY(), soldier.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((soldier.getRandom().nextFloat() - soldier.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                if (target.getItemInHand().getCount() == 0) {
+                if (target.getItem().getCount() == 0) {
                     target.makeFakeItem();
                 }
                 cleanUp();
@@ -114,7 +114,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
 
         @Override
         boolean hasValidTarget() {
-            return getTarget() != null && getTarget().getItemInHand().getCount() >= 1;
+            return getTarget() != null && getTarget().getItem().getCount() >= 1;
         }
 
         @Override

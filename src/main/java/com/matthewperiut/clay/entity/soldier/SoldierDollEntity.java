@@ -111,7 +111,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     }
 
     private PlayState attackPredicate(AnimationTest<SoldierDollEntity> event) {
-        if (this.swingTime > 0) {
+        if (this.swingState.isSwinging()) {
             event.controller().reset();
             event.controller().setAnimation(RawAnimation.begin().thenPlay("animation.clay_soldier.attack"));
             
@@ -163,19 +163,19 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
 
     @Override
     protected SoundEvent getHurtSound(DamageSource src) {
-        return SoundEvents.GRAVEL_BREAK.value();
+        return SoundEvents.GRAVEL_BREAK;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.GRAVEL_STEP.value();
+        return SoundEvents.GRAVEL_STEP;
     }
 //region EVENTS
 
     @Override
     public void die(DamageSource damageSource) {
         if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).discard();
-        if (damageSource.getType().equals(this.level().damageSources().inFire().getType()) || (damageSource.getType().equals(this.level().damageSources().lava().getType())))
+        if (damageSource.type().equals(this.level().damageSources().inFire().type()) || (damageSource.type().equals(this.level().damageSources().lava().type())))
             level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get(), 1)));
         for (ISoldierUpgrade upgrade : upgrades) {
             level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), upgrade.getUpgradeItem()));
@@ -183,9 +183,8 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
         super.die(damageSource);
     }
 
-    @Override
-    public void onAttack(Entity target) {
-        super.onAttack(target);
+    public void afterSoldierAttack(Entity target) {
+
 
         if (target instanceof SoldierDollEntity targetSoldier) {
             this.upgrades.forEach(u -> u.onAttack(targetSoldier, this));
@@ -219,18 +218,14 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
 
     @Override
     public boolean doHurtTarget(ServerLevel world, Entity target) {
-        swing(InteractionHand.MAIN_HAND);
-        return super.doHurtTarget(world, target);
+        swingForAttack(InteractionHand.MAIN_HAND);
+        boolean hit = super.doHurtTarget(world, target);
+        if (hit) afterSoldierAttack(target);
+        return hit;
     }
 //endregion EVENTS
 
-    @Override
-    public boolean requiresCustomPersistence() {
-        if (this instanceof ISpawnReasonExtension) {
-            return ((ISpawnReasonExtension) this).clay$getSpawnReason() == EntitySpawnReason.SPAWN_EGG;
-        }
-        return super.requiresCustomPersistence();
-    }
+
 
     public Entity getFollowingEntity() {
         return followingEntity;
@@ -320,7 +315,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.add(HAS_STICK, false);
+        builder.define(HAS_STICK, false);
 
     }
     static {

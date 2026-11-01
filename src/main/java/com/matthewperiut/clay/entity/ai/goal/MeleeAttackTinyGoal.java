@@ -75,7 +75,7 @@ public class MeleeAttackTinyGoal extends Goal
         {
             return false;
         }
-        else if (!this.mob.isWithinRestriction(livingEntity.blockPosition()))
+        else if (!this.mob.isWithinHome(livingEntity.blockPosition()))
         {
             return false;
         }
@@ -112,9 +112,9 @@ public class MeleeAttackTinyGoal extends Goal
     {
         Entity mob = this.mob;
         if (mob.isPassenger()) mob = mob.getVehicle();
-        double x = direction.getX();
-        double y = direction.getY();
-        double z = direction.getZ();
+        double x = direction.x;
+        double y = direction.y;
+        double z = direction.z;
         double length = sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
         mob.push((x / length) * mod, (y / length) * mod, (z / length) * mod);
     }
@@ -124,11 +124,11 @@ public class MeleeAttackTinyGoal extends Goal
         LivingEntity livingEntity = this.mob.getTarget();
         if (livingEntity != null)
         {
-            this.mob.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
+            this.mob.getLookControl().setLookAt(livingEntity, 30.0F, 30.0F);
             double d = this.mob.distanceToSqr(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-            if ((this.mob.getSensing().canSee(livingEntity)))
+            if ((this.mob.getSensing().hasLineOfSight(livingEntity)))
             {
-                this.mob.getNavigation().startMovingTo(livingEntity, this.speed);
+                this.mob.getNavigation().moveTo(livingEntity, this.speed);
                 pushTowardOther(livingEntity.position().subtract(this.mob.position()), 0.0125);
             }
 
@@ -141,8 +141,8 @@ public class MeleeAttackTinyGoal extends Goal
         double d = this.getSquaredMaxAttackDistance(target);
         if (hostileRadiusSqr <= d)
         {
-            this.mob.swing(InteractionHand.MAIN_HAND);
-            this.mob.tryAttack(target);
+            this.mob.swingForAttack(InteractionHand.MAIN_HAND);
+            this.mob.doHurtTarget((net.minecraft.server.level.ServerLevel) this.mob.level(), target);
         }
     }
 

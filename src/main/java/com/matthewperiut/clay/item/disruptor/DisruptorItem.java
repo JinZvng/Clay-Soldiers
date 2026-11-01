@@ -50,7 +50,7 @@ public class DisruptorItem extends Item
         {
             if (entity instanceof SoldierDollEntity || entity instanceof HorseDollEntity)
             {
-                entity.kill();
+                if (world instanceof ServerLevel server) entity.kill(server);
                 found = true;
             }
         }
@@ -67,20 +67,20 @@ public class DisruptorItem extends Item
             if (!unlimited)
             {
                 stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) user, item -> stack.setCount(0));
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
 
                 return true;
             }
 
             if (user instanceof Player)
             {
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
                 return true;
             }
             else
             {
                 stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) user, item -> stack.setCount(0));
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
 
                 return true;
             }
@@ -103,7 +103,7 @@ public class DisruptorItem extends Item
                     BlockPos blockPos = new BlockPos(x, y, z);
                     BlockState blockState = world.getBlockState(blockPos);
 
-                    if (blockState.getBlock().getDefaultState().equals(Blocks.CLAY.getDefaultState()))
+                    if (blockState.getBlock().defaultBlockState().equals(Blocks.CLAY.defaultBlockState()))
                     {
                         world.destroyBlock(blockPos, true);
                         found = true;
@@ -117,19 +117,19 @@ public class DisruptorItem extends Item
             if (!unlimited)
             {
                 stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) user, item -> stack.setCount(0));
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
                 return true;
             }
 
             if (user instanceof Player)
             {
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
                 return true;
             }
             else
             {
                 stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) user, item -> stack.setCount(0));
-                ((Player) user).getCooldowns().set(this, 20);
+                ((Player) user).getCooldowns().addCooldown(stack, 20);
                 return true;
             }
         }
@@ -140,6 +140,7 @@ public class DisruptorItem extends Item
     @Override
     public InteractionResult use(Level world, Player user, InteractionHand hand)
     {
+        if (world.isClientSide()) return InteractionResult.SUCCESS;
 
         ItemStack itemStack = user.getItemInHand(hand);
 
@@ -149,4 +150,9 @@ public class DisruptorItem extends Item
         return InteractionResult.FAIL;
     }
 
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("item.clay.disruptor.range").withStyle(ChatFormatting.GRAY));
+        super.appendHoverText(stack, context, display, tooltip, flag);
+    }
 }

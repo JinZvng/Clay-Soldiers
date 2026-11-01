@@ -24,7 +24,7 @@ public class DisruptorDispenserBehavior extends OptionalDispenseItemBehavior
         Item item = stack.getItem();
 
         if (item instanceof DisruptorItem disruptor) {
-            this.setSuccess(disruptor.killClayEntity(world, Vec3.ofCenter(pointer.pos())));
+            this.setSuccess(disruptor.killClayEntity(world, Vec3.atCenterOf(pointer.pos())));
             if (this.isSuccess()) {
                 if (!disruptor.unlimited) {
                     stack.hurtAndBreak(1, (ServerLevel) world, (ServerPlayer) null, i -> stack.setCount(0));

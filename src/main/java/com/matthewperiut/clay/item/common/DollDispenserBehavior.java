@@ -37,7 +37,7 @@ public class DollDispenserBehavior implements DispenseItemBehavior
             Entity e = entityType.spawn(world, stack, null, spawnPos, EntitySpawnReason.DISPENSER, false, false);
             if (e != null)
             {
-                world.playSound(null, pos, SoundEvents.GRAVEL_BREAK.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
+                world.playSound(null, pos, SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
                 world.gameEvent(GameEvent.ENTITY_PLACE, spawnPos, GameEvent.Context.of(e));
                 stack.setCount(stack.getCount() - 1);
             }

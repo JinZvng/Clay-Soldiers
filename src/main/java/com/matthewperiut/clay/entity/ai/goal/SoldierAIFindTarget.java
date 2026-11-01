@@ -66,7 +66,7 @@ public abstract class SoldierAIFindTarget<T extends Entity> extends Goal {
 
         @Override
         protected boolean isTargetable(HorseDollEntity searchTarget) {
-            return searchTarget.isAlive() && !searchTarget.isVehicle() && searchTarget.canSee(soldier);
+            return searchTarget.isAlive() && !searchTarget.isVehicle() && searchTarget.hasLineOfSight(soldier);
         }
 
         @Override
@@ -83,7 +83,7 @@ public abstract class SoldierAIFindTarget<T extends Entity> extends Goal {
 
         @Override
         protected boolean isTargetable(ItemEntity searchTarget) {
-            return UpgradeManager.INSTANCE.canApplyUpdate(soldier, searchTarget.getItemInHand());
+            return UpgradeManager.INSTANCE.canApplyUpdate(soldier, searchTarget.getItem());
         }
 
         @Override

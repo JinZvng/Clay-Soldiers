@@ -19,8 +19,8 @@ public final class SoldierDollRenderer extends GeoEntityRenderer<SoldierDollEnti
     public SoldierDollRenderer(EntityRendererProvider.Context context, Identifier texture) {
         super(context, new SoldierDollModel(texture));
         this.shadowRadius = 0.1f;
-        addRenderLayer(new SoldierDollLeatherArmorLayer(this));
-        addRenderLayer(new BlockAndItemGeoLayer<SoldierDollEntity, Void, ClayRenderState>(context, this) {
+        this.renderLayers.addLayer(new SoldierDollLeatherArmorLayer(this));
+        this.renderLayers.addLayer(new BlockAndItemGeoLayer<SoldierDollEntity, Void, ClayRenderState>(context, this) {
             @Override protected List<RenderData> getRelevantBones(SoldierDollEntity entity, Void ignored, ClayRenderState state, float tick) {
                 ItemStackRenderState main = new ItemStackRenderState();
                 ItemStackRenderState off = new ItemStackRenderState();
@@ -33,10 +33,10 @@ public final class SoldierDollRenderer extends GeoEntityRenderer<SoldierDollEnti
             }
             @Override protected void submitItemStackRender(PoseStack pose, GeoBone bone, ItemStackRenderState stack, ItemDisplayContext display, ClayRenderState state, SubmitNodeCollector tasks, int light) {
                 pose.pushPose();
-                pose.mulPose(Axis.XN.rotation(105));
+                pose.rotate(Axis.XN.rotation(105));
                 pose.scale(0.2f, 0.2f, 0.2f);
                 pose.translate(0.06f, -0.5f, 0f);
-                pose.mulPose(Axis.ZN.rotation(2.4f));
+                pose.rotate(Axis.ZN.rotation(2.4f));
                 super.submitItemStackRender(pose, bone, stack, display, state, tasks, light);
                 pose.popPose();
             }

@@ -42,7 +42,7 @@ public class ClientNetworkHandler {
             ClayMod.LOGGER.warn("Unknown upgrade id");
             return Optional.empty();
         }
-        Entity entity = context.getPlayer().getCommandSenderWorld().getEntity(soldierEntityId);
+        Entity entity = context.getPlayer().level().getEntity(soldierEntityId);
         if (entity instanceof SoldierDollEntity soldier) {
             return Optional.of(new SoldierUpgradeContainer(upgrade, soldier));
         }
