@@ -45,10 +45,11 @@ public final class GameplaySmoke {
     private static void advance(Minecraft mc) {
         if (serverFailure != null) throw new IllegalStateException(serverFailure);
         if (phase == 0) {
-            if (mc.screen != null && mc.screen.getClass().getSimpleName().equals("AccessibilityOnboardingScreen")) {
+            if (mc.gui.screen() != null && mc.gui.screen().getClass().getSimpleName().equals("AccessibilityOnboardingScreen")) {
                 mc.setScreenAndShow(new TitleScreen());
             }
-            if (mc.screen instanceof TitleScreen && ++ticks >= 20) {
+            if (mc.gui.screen() instanceof TitleScreen && ++ticks >= 20) {
+                mc.options.pauseOnLostFocus = false;
                 mc.options.renderDistance().set(2);
                 mc.options.simulationDistance().set(5);
                 phase = 1;
@@ -57,7 +58,7 @@ public final class GameplaySmoke {
             return;
         }
         if (phase == 1) {
-            if (!(mc.screen instanceof CreateWorldScreen screen)) return;
+            if (!(mc.gui.screen() instanceof CreateWorldScreen screen)) return;
             var state = screen.getUiState();
             state.setName("Clay Smoke Test");
             state.setSeed("1");
