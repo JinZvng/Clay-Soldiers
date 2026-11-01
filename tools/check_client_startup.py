@@ -20,7 +20,7 @@ try:
             text = log.read_text(encoding='utf-8', errors='replace')
             if re.search(r'ModLoadingException|NoSuchMethodError|NoClassDefFoundError|ReportedException|Exception in thread', text):
                 raise RuntimeError('Minecraft startup reported a loading error; inspect the client output above.')
-            if re.search(r'Created:? .*atlas', text, re.IGNORECASE):
+            if re.search(r'Created:? .*atlas', text, re.IGNORECASE) and 'CLAY_RENDER_STATE_STORAGE_OK' in text:
                 ready_since = ready_since or time.monotonic()
                 if time.monotonic() - ready_since >= 5:
                     success = True
@@ -30,7 +30,7 @@ try:
         time.sleep(1)
     if not success:
         raise RuntimeError('Client startup timed out before resource loading completed.')
-    print('Client startup and atlas resource loading passed. Gameplay still needs an in-world test.', flush=True)
+    print('Client startup, render-state ticket storage and atlas resource loading passed. Gameplay still needs an in-world test.', flush=True)
 finally:
     if process.poll() is None:
         os.killpg(process.pid, signal.SIGTERM)
