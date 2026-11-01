@@ -77,6 +77,9 @@ public class ItemRegistry {
         ITEMS.register();
         HORSE_ITEMS.register();
         MISC_ITEMS.register();
+        ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_GROUP, item));
+        HORSE_ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_GROUP, item));
+        MISC_ITEMS.forEach(item -> dev.architectury.registry.CreativeTabRegistry.append(CLAY_MISC_GROUP, item));
     }
 
     public static void post() {

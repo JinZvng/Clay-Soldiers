@@ -76,9 +76,9 @@ public class SoldierLeatherUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public void doPostHurtEffects(SoldierDollEntity attacker, SoldierDollEntity soldier) {
-        reduceNBTDurability(attacker.upgradeInstances.get(this).nbtCompound(), attacker);
-        if (getUses(attacker) <= 0) {
-            attacker.removeUpgrades.add(this);
+        reduceNBTDurability(soldier.upgradeInstances.get(this).nbtCompound(), soldier);
+        if (getUses(soldier) <= 0) {
+            soldier.removeUpgrades.add(this);
         }
     }
 

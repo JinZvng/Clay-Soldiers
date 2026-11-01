@@ -45,6 +45,7 @@ public final class SoldierDollRenderer extends GeoEntityRenderer<SoldierDollEnti
     @Override public ClayRenderState createRenderState(SoldierDollEntity entity, Void ignored) { return new ClayRenderState(); }
     @Override public void addRenderData(SoldierDollEntity entity, Void ignored, ClayRenderState state, float tick) {
         super.addRenderData(entity, ignored, state, tick);
+        state.addGeckolibData(SoldierDollEntity.RIDING, entity.isPassenger());
         state.leather = entity.upgrades.contains(LEATHER_UPGRADE.get());
         state.wool = entity.upgrades.contains(WOOL_UPGRADE.get());
     }

@@ -10,9 +10,12 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 public final class ClayModNeoForge {
     public ClayModNeoForge(IEventBus bus) {
         ClayMod.init();
+        if (Platform.getEnv() == Dist.DEDICATED_SERVER) {
+            dev.architectury.networking.NetworkManager.registerS2CPayloadType(com.matthewperiut.clay.network.payload.SyncUpgradesPayload.ID, com.matthewperiut.clay.network.payload.SyncUpgradesPayload.CODEC);
+        }
         bus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(ClayMod::post));
         if (Platform.getEnv() == Dist.CLIENT) {
-            bus.addListener((FMLClientSetupEvent event) -> event.enqueueWork(ClayMod::initClient));
+            ClayMod.initClient();
         }
     }
 }

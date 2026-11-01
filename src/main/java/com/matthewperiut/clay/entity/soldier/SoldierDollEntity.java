@@ -77,7 +77,8 @@ import java.util.*;
 import static com.matthewperiut.clay.entity.soldier.teams.ITeam.NBT_IDENTIFIER;
 import static com.matthewperiut.clay.registry.TeamRegistry.CLAY_TEAM;
 
-public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, EntitySpawnExtension {
+public class SoldierDollEntity extends PathfinderMob implements com.geckolib.animatable.GeoEntity, EntitySpawnExtension {
+    public static final com.geckolib.constant.dataticket.DataTicket<Boolean> RIDING = com.geckolib.constant.dataticket.DataTicket.create("clay_riding", Boolean.class);
     public static final Identifier TEXTURE_ID = Identifier.fromNamespaceAndPath(ClayMod.MOD_ID, "textures/entity/soldier/lightgray.png");
     private final AnimatableInstanceCache animationCache = GeckoLibUtil.createInstanceCache(this);
     public HashSet<ISoldierUpgrade> upgrades = new HashSet<>();
@@ -98,7 +99,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     }
 
     private <E extends GeoAnimatable> PlayState predicate(AnimationTest<E> event) {
-        if (this.isPassenger()) {
+        if (event.renderState().getOrDefaultGeckolibData(RIDING, false)) {
             event.controller().setAnimation(RawAnimation.begin().thenPlay("animation.clay_soldier.ride"));
             return PlayState.CONTINUE;
         }
@@ -110,21 +111,11 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
         return PlayState.CONTINUE;
     }
 
-    private PlayState attackPredicate(AnimationTest<SoldierDollEntity> event) {
-        if (this.swingState.isSwinging()) {
-            event.controller().reset();
-            event.controller().setAnimation(RawAnimation.begin().thenPlay("animation.clay_soldier.attack"));
-            
-            return PlayState.STOP;
-        }
-        return PlayState.CONTINUE;
-    }
-
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
         controllerRegistrar.add(
                 new AnimationController<>( "controller", 0, this::predicate),
-                new AnimationController<>( "attackController", 1, this::attackPredicate)
+                new AnimationController<SoldierDollEntity>("attackController", test -> PlayState.STOP).triggerableAnim("attack", RawAnimation.begin().thenPlay("animation.clay_soldier.attack"))
         );
     }
 
@@ -174,7 +165,7 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
 
     @Override
     public void die(DamageSource damageSource) {
-        if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).discard();
+        if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).kill((ServerLevel) level());
         if (damageSource.type().equals(this.level().damageSources().inFire().type()) || (damageSource.type().equals(this.level().damageSources().lava().type())))
             level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get(), 1)));
         for (ISoldierUpgrade upgrade : upgrades) {
@@ -203,24 +194,31 @@ public class SoldierDollEntity extends PathfinderMob implements GeoAnimatable, E
     @Override
     public boolean skipAttackInteraction(Entity attacker) {
         if (attacker instanceof Player) {
-            discard();
-        }
-        if (attacker instanceof SoldierDollEntity attackerSoldier) {
-            this.upgrades.forEach(u -> u.doPostHurtEffects(attackerSoldier, this));
-            ISoldierUpgrade upgrade;
-            while ((upgrade = removeUpgrades.poll()) != null) {
-                UpgradeManager.INSTANCE.removeUpgrade(this, upgrade);
-            }
+            if (level() instanceof ServerLevel server) kill(server);
         }
 
         return super.skipAttackInteraction(attacker);
     }
 
     @Override
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(world, source, amount);
+        if (hurt && source.getEntity() instanceof SoldierDollEntity attacker) {
+            for (ISoldierUpgrade upgrade : new HashSet<>(upgrades)) upgrade.doPostHurtEffects(attacker, this);
+            ISoldierUpgrade expired;
+            while ((expired = removeUpgrades.poll()) != null) UpgradeManager.INSTANCE.removeUpgrade(this, expired);
+        }
+        return hurt;
+    }
+
+    @Override
     public boolean doHurtTarget(ServerLevel world, Entity target) {
         swingForAttack(InteractionHand.MAIN_HAND);
         boolean hit = super.doHurtTarget(world, target);
-        if (hit) afterSoldierAttack(target);
+        if (hit) {
+            triggerAnim("attackController", "attack");
+            afterSoldierAttack(target);
+        }
         return hit;
     }
 //endregion EVENTS

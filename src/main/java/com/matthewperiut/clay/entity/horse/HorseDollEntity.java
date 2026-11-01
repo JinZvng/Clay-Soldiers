@@ -104,7 +104,7 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     @Override
     public boolean skipAttackInteraction(Entity attacker)
     {
-        if (attacker instanceof Player) discard();
+        if (attacker instanceof Player && level() instanceof net.minecraft.server.level.ServerLevel server) kill(server);
         return super.skipAttackInteraction(attacker);
     }
 

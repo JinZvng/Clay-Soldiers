@@ -23,7 +23,7 @@ public class SoldierWoolUpgrade implements ISoldierUpgrade {
 
     @Override
     public ItemStack getUpgradeItem() {
-        return new ItemStack(Items.WOOL.get(net.minecraft.world.item.DyeColor.WHITE), 1);
+        return new ItemStack(Items.WOOL.white(), 1);
     }
 
     @Override
