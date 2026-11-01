@@ -1,55 +1,38 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
-
-architectury {
-    minecraft = rootProject.minecraft_version
+version = '1.1.0-26.3'
+group = 'com.matthewperiut'
+base { archivesName = 'clay-neoforge-26.3' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+repositories {
+    maven { url = 'https://maven.architectury.dev/' }
+    maven { url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
-
-subprojects {
-    apply plugin: "dev.architectury.loom"
-
-    loom {
-        silentMojangMappingsLicense()
+neoForge {
+    version = '26.3.0.101'
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
     }
-
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings loom.layered {
-            it.mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
-            it.mappings("dev.architectury:yarn-mappings-patch-neoforge:1.21+build.4")
-        }
-    }
+    mods { clay { sourceSet(sourceSets.main) } }
 }
-
-allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
-
-    base {
-        archivesName = rootProject.archives_base_name
-    }
-
-    version = rootProject.mod_version
-    group = rootProject.maven_group
-
-    repositories {
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
-        maven { url "https://maven.neoforged.net/releases/" }
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 21
-    }
-
-    java {
-        withSourcesJar()
-    }
+dependencies {
+    implementation 'dev.architectury:architectury-neoforge:21.0.5'
+    implementation 'com.geckolib:geckolib-neoforge-26.3:5.5.7'
 }
+tasks.register('preparePortResources', Exec) {
+    inputs.dir('common/src/main/resources')
+    inputs.file('common/src/main/java/com/matthewperiut/clay/registry/ItemRegistry.java')
+    inputs.file('tools/prepare_resources_26_3.py')
+    outputs.dir(layout.buildDirectory.dir('migration-26.3/resources'))
+    doFirst { delete(layout.buildDirectory.dir('migration-26.3/resources')) }
+    commandLine 'python3', 'tools/prepare_resources_26_3.py'
+}
+sourceSets.main.resources.srcDir(layout.buildDirectory.dir('migration-26.3/resources'))
+tasks.named('processResources') {
+    dependsOn 'preparePortResources'
+    exclude 'clay.mixins.json', 'clay.accesswidener', 'architectury.common.json'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[12,)"
+license="MIT"
+[[mods]]
+modId="clay"
+version="1.1.0-26.3"
+displayName="Clay Soldiers"
+authors="Slainlite"
+description="Clay Soldiers port for NeoForge 26.3"
+[[dependencies.clay]]
+modId="minecraft"
+type="required"
+versionRange="[26.3,26.4)"
+[[dependencies.clay]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.101,)"
+[[dependencies.clay]]
+modId="geckolib"
+type="required"
+versionRange="[5.5.7,6)"
+[[dependencies.clay]]
+modId="architectury"
+type="required"
+versionRange="[21.0.5,)"
