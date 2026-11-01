@@ -13,7 +13,7 @@ repositories {
 neoForge {
     version = '26.3.0.101'
     runs {
-        client { client() }
+        client { client(); gameDirectory = project.file('run') }
         server { server(); programArgument '--nogui' }
     }
     mods { clay { sourceSet(sourceSets.main) } }
