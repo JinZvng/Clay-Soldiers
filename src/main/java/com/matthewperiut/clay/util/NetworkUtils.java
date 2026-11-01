@@ -12,7 +12,10 @@ public class NetworkUtils {
     }
 
     public static Iterable<ServerPlayer> getTrackingPlayers(Entity entity) {
-        return ((ServerChunkCache) entity.level().getChunkSource()).chunkMap.getPlayers(entity.chunkPosition(), false);
+        if (entity.level() instanceof net.minecraft.server.level.ServerLevel server) {
+            return server.getChunkSource().chunkMap.getPlayers(entity.chunkPosition(), false);
+        }
+        return java.util.List.of();
     }
 
     public static FriendlyByteBuf getBufferForUpgrades(int entityId, Identifier upgradeIdentifier) {

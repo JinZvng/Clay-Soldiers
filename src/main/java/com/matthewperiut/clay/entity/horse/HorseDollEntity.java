@@ -109,12 +109,12 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     }
 
     @Override
-    public void die(DamageSource damageSource)
-    {
-        if (damageSource.type().equals(this.level().damageSources().inFire().type()) || damageSource.type().equals(this.level().damageSources().lava().type()))
-            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_HORSE.get(), 1)));
+    public void die(DamageSource damageSource) {
+        if (level() instanceof net.minecraft.server.level.ServerLevel server
+                && (damageSource.type().equals(server.damageSources().inFire().type())
+                    || damageSource.type().equals(server.damageSources().lava().type()))) {
+            server.addFreshEntity(new ItemEntity(server, getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_HORSE.get())));
+        }
         super.die(damageSource);
     }
-
-
 }

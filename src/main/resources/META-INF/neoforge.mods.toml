@@ -3,7 +3,7 @@ loaderVersion="[12,)"
 license="MIT"
 [[mods]]
 modId="clay"
-version="1.1.2-26.3"
+version="1.1.3-26.3"
 displayName="Clay Soldiers"
 authors="Slainlite"
 description="Clay Soldiers port for NeoForge 26.3"

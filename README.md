@@ -26,6 +26,8 @@ The active Java sources are in `src/main/java`. The historical Fabric and NeoFor
 
 ## In-game validation
 
+CI also creates a temporary flat world, renders a mounted soldier and horse, exercises client death callbacks, and verifies server-side mount removal and a single upgrade drop. This automation is opt-in through the development-only `clayGameplaySmoke` Gradle property.
+
 After installing the mod and dependencies, test soldier colors, combat between teams, horses and dispensers. Drop stick, flint, leather, wool and glowstone upgrades near soldiers; verify durability, rendering and persistence after saving and reopening the world. Check all three disruptors. A successful build or client-startup check alone does not validate those interactions.
 
 ---

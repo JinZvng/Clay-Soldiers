@@ -48,6 +48,7 @@ public final class SoldierDollRenderer extends GeoEntityRenderer<SoldierDollEnti
         state.addGeckolibData(SoldierDollEntity.RIDING, entity.isPassenger());
         state.leather = entity.upgrades.contains(LEATHER_UPGRADE.get());
         state.wool = entity.upgrades.contains(WOOL_UPGRADE.get());
+        com.matthewperiut.clay.neoforge.GameplaySmoke.rendered(entity.getId());
     }
     @Override protected int getBlockLightLevel(SoldierDollEntity entity, BlockPos pos) {
         return entity.isLightBlockUnaffected() ? 15 : super.getBlockLightLevel(entity, pos);

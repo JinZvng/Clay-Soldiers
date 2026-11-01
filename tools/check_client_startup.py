@@ -9,7 +9,7 @@ import time
 log = Path('run/logs/latest.log')
 old_mtime = log.stat().st_mtime_ns if log.exists() else None
 command = ['xvfb-run', '-a', '-s', '-screen 0 1280x720x24 +extension GLX +render -noreset',
-           'bash', './gradlew', 'runClient', '--no-daemon', '--console=plain']
+           'bash', './gradlew', 'runClient', '--no-daemon', '--console=plain', '-PclayGameplaySmoke=true']
 process = subprocess.Popen(command, start_new_session=True)
 deadline = time.monotonic() + 240
 ready_since = None
@@ -18,9 +18,9 @@ try:
     while time.monotonic() < deadline:
         if log.exists() and log.stat().st_mtime_ns != old_mtime:
             text = log.read_text(encoding='utf-8', errors='replace')
-            if re.search(r'ModLoadingException|NoSuchMethodError|NoClassDefFoundError|ReportedException|Exception in thread', text):
+            if re.search(r'ModLoadingException|NoSuchMethodError|NoClassDefFoundError|ReportedException|Exception in thread|CLAY_GAMEPLAY_SMOKE_FAILED', text):
                 raise RuntimeError('Minecraft startup reported a loading error; inspect the client output above.')
-            if re.search(r'Created:? .*atlas', text, re.IGNORECASE) and 'CLAY_RENDER_STATE_STORAGE_OK' in text:
+            if re.search(r'Created:? .*atlas', text, re.IGNORECASE) and 'CLAY_RENDER_STATE_STORAGE_OK' in text and 'CLAY_GAMEPLAY_SMOKE_OK:' in text:
                 ready_since = ready_since or time.monotonic()
                 if time.monotonic() - ready_since >= 5:
                     success = True
@@ -30,7 +30,7 @@ try:
         time.sleep(1)
     if not success:
         raise RuntimeError('Client startup timed out before resource loading completed.')
-    print('Client startup, render-state ticket storage and atlas resource loading passed. Gameplay still needs an in-world test.', flush=True)
+    print('Client startup, render-state storage, world creation, mounted entity rendering, client death callbacks and authoritative server drops passed.', flush=True)
 finally:
     if process.poll() is None:
         os.killpg(process.pid, signal.SIGTERM)

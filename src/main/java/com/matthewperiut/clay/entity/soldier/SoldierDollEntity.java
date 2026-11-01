@@ -163,11 +163,18 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 
     @Override
     public void die(DamageSource damageSource) {
-        if (this.isPassenger()) Objects.requireNonNull(this.getVehicle()).kill((ServerLevel) level());
-        if (damageSource.type().equals(this.level().damageSources().inFire().type()) || (damageSource.type().equals(this.level().damageSources().lava().type())))
-            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get(), 1)));
-        for (ISoldierUpgrade upgrade : upgrades) {
-            level().addFreshEntity(new ItemEntity(level(), getX(), getY(), getZ(), upgrade.getUpgradeItem()));
+        // The client also invokes die() when handling the entity-death packet.
+        // Mount removal and drops must only run in the authoritative world.
+        if (level() instanceof ServerLevel server) {
+            Entity vehicle = getVehicle();
+            if (vehicle != null) vehicle.kill(server);
+            if (damageSource.type().equals(server.damageSources().inFire().type())
+                    || damageSource.type().equals(server.damageSources().lava().type())) {
+                server.addFreshEntity(new ItemEntity(server, getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get())));
+            }
+            for (ISoldierUpgrade upgrade : upgrades) {
+                server.addFreshEntity(new ItemEntity(server, getX(), getY(), getZ(), upgrade.getUpgradeItem()));
+            }
         }
         super.die(damageSource);
     }

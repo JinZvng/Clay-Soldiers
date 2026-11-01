@@ -8,6 +8,9 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 public final class ClientEntrypoint {
     public static void init(IEventBus bus) {
         ClayMod.initClient();
+        if (Boolean.getBoolean("clay.gameplaySmoke")) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(GameplaySmoke::tick);
+        }
         if (Boolean.getBoolean("clay.checkRenderStateStorage")) {
             bus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(ClientEntrypoint::checkRenderStateStorage));
         }

@@ -8,5 +8,9 @@ public final class HorseDollRenderer extends GeoEntityRenderer<HorseDollEntity, 
         super(context, new HorseDollModel(texture));
         this.shadowRadius = 0.1f;
     }
+    @Override public void addRenderData(HorseDollEntity entity, Void ignored, ClayRenderState state, float partialTick) {
+        super.addRenderData(entity, ignored, state, partialTick);
+        com.matthewperiut.clay.neoforge.GameplaySmoke.rendered(entity.getId());
+    }
     @Override public ClayRenderState createRenderState(HorseDollEntity entity, Void ignored) { return new ClayRenderState(); }
 }
