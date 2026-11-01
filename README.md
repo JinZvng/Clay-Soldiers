@@ -20,7 +20,7 @@ git pull --ff-only origin codex/neoforge-26.3
 bash ./gradlew clean build
 ```
 
-The mod JAR is written to `build/libs/`. The GitHub Actions workflow also provides a `clay-neoforge-26.3` artifact after its checks pass.
+The mod JAR is written to `build/libs/`. The GitHub Actions workflow also provides a `clay-neoforge-26.3` artifact after compilation succeeds. A separate virtual-display step checks client startup; review that result before treating the artifact as startup-validated.
 
 The active Java sources are in `src/main/java`. The historical Fabric and NeoForge source trees are retained for reference and are not part of this build. Resources are converted from `common/src/main/resources` by `tools/prepare_resources_26_3.py` during the build.
 
