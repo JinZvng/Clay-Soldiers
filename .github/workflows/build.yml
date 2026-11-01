@@ -23,7 +23,7 @@ jobs:
       - name: Set up Gradle and validate wrapper
         uses: gradle/actions/setup-gradle@v4
       - name: Build existing NeoForge mod
-        run: bash ./gradlew :neoforge:build --no-daemon --stacktrace
+        run: bash ./gradlew :neoforge:build --no-daemon --console=plain --stacktrace
       - name: Upload NeoForge artifacts
         uses: actions/upload-artifact@v4
         with:
