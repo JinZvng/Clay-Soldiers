@@ -20,11 +20,11 @@ def write_json(path, value):
 
 def ingredient(value):
     if isinstance(value, str):
-        return value
+        return {"minecraft:grass": "minecraft:short_grass"}.get(value, value)
     if isinstance(value, list):
         return [ingredient(v) for v in value]
     if isinstance(value, dict) and set(value) == {'item'}:
-        return value['item']
+        return ingredient(value['item'])
     if isinstance(value, dict) and set(value) == {'tag'}:
         return '#' + value['tag']
     raise ValueError('Unsupported ingredient: ' + repr(value))

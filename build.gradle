@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'net.neoforged.moddev' version '2.0.148'
 }
-version = '1.1.0-26.3'
+version = '1.1.1-26.3'
 group = 'com.matthewperiut'
 base { archivesName = 'clay-neoforge-26.3' }
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -34,3 +34,6 @@ tasks.named('processResources') {
     exclude 'pack.mcmeta', 'clay.mixins.json', 'clay.accesswidener', 'architectury.common.json'
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.compilerArgs.addAll(['-Xmaxerrs', '1000']) }
+
+// Keep the upstream MIT notice in redistributed binaries.
+tasks.named('jar') { from('LICENSE') { into 'META-INF' } }
