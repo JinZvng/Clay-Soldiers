@@ -394,6 +394,14 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     public void tick() {
         super.tick();
         if(level() instanceof ServerLevel && isAlive()) {
+            if(orderMode!=3 && tickCount%10==0) {
+                for(var item:level().getEntitiesOfClass(ItemEntity.class,getBoundingBox().inflate(1))) {
+                    if(!item.getItem().isEmpty() && UpgradeManager.INSTANCE.canApplyUpdate(this,item.getItem())) {
+                        UpgradeManager.INSTANCE.applyUpdate(this,item.getItem());item.getItem().shrink(1);
+                        if(item.getItem().isEmpty())item.discard();
+                    }
+                }
+            }
             if(tickCount%20==0 && !isPassenger() && orderMode!=2) {
                 var allays=level().getEntitiesOfClass(net.minecraft.world.entity.animal.allay.Allay.class,getBoundingBox().inflate(1.5),a->a.isAlive()&&!a.isVehicle());
                 if(!allays.isEmpty())startRiding(allays.getFirst());

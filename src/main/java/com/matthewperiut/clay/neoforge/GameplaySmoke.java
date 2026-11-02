@@ -78,6 +78,8 @@ public final class GameplaySmoke {
         }
         if (phase == 2) {
             if (mc.level == null || mc.player == null || mc.getSingleplayerServer() == null || ++ticks < 40) return;
+            mc.setScreenAndShow(new WhistleScreen(net.minecraft.world.InteractionHand.MAIN_HAND));
+            if(mc.gui.screen().children().stream().filter(c->c instanceof Button).count()!=4)throw new IllegalStateException("Whistle menu did not expose four orders");
             phase = 3;
             ticks = 0;
             var server = mc.getSingleplayerServer();
@@ -109,6 +111,7 @@ public final class GameplaySmoke {
                     || !(mc.level.getEntity(horseId) instanceof HorseDollEntity horse)
                     || !soldier.isPassenger() || !rendered.contains(soldierId) || !rendered.contains(horseId)) return;
             if (++ticks < 20) return;
+            mc.setScreenAndShow(null);
             var area = soldier.getBoundingBox().inflate(8);
             int items = mc.level.getEntitiesOfClass(ItemEntity.class, area).size();
             // Same client death-event callback as ClientboundEntityEventPacket.
@@ -161,6 +164,12 @@ public final class GameplaySmoke {
         // Peaceful may remove it on the next server tick, but the command is tested synchronously.
         s.command(1,player,target);s.tickCommand();
         if(s.getTarget()!=target)throw new IllegalStateException("Attack command lost explicit target");
+        var saved=net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING,level.registryAccess());
+        s.saveWithoutId(saved);
+        var restored=EntityTypeRegistry.BLUE_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
+        restored.load(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,level.registryAccess(),saved.buildResult()));
+        if(!restored.hasToy("bow")||!restored.hasToy("feather")||restored.orderMode!=2)throw new IllegalStateException("Saved upgrades/orders did not restore");
+        restored.discard();
         s.command(3,player,null);
         if(s.orderMode!=3||s.getTarget()!=null)throw new IllegalStateException("Release command failed");
         s.kill(level);

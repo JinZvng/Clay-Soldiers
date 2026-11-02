@@ -15,7 +15,7 @@ public class CommandWhistleItem extends Item {
  private static CompoundTag data(ItemStack s){return s.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();}
  private static void save(ItemStack s,CompoundTag d){s.set(DataComponents.CUSTOM_DATA,CustomData.of(d));}
  public InteractionResult interactLivingEntity(ItemStack stack,Player p,LivingEntity target,InteractionHand hand){
-  if(p.level().isClientSide())return InteractionResult.SUCCESS;
+  if(p.level().isClientSide())return p.isShiftKeyDown()?InteractionResult.SUCCESS:use(p.level(),p,hand);
   if(target instanceof SoldierDollEntity s && p.isShiftKeyDown()){
    var d=data(stack);d.putShort("team",s.getSoldierTeam().getTeamId());save(stack,d);
    p.sendOverlayMessage(Component.translatable("clay.whistle.selected",s.getName()));return InteractionResult.SUCCESS;

@@ -95,6 +95,7 @@ public abstract class SoliderAIFollowTarget extends Goal {
         void action(double distanceToTarget) {
             if (distanceToTarget <= 2) {
                 ItemEntity target = getTarget();
+                if(!UpgradeManager.INSTANCE.canApplyUpdate(soldier,target.getItem())) {cleanUp();return;}
                 UpgradeManager.INSTANCE.applyUpdate(soldier, target.getItem());
                 target.getItem().shrink(1);
                 soldier.level().playSound(null, soldier.getX(), soldier.getY(), soldier.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((soldier.getRandom().nextFloat() - soldier.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
