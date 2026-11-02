@@ -28,7 +28,8 @@ public final class GameplaySmoke {
     private static int phase, ticks;
     private static volatile int soldierId = -1, horseId = -1;
     private static volatile String serverFailure;
-    private static volatile boolean serverChecked;
+    private static volatile boolean serverChecked, menuChecked;
+    private static volatile int toySoldierId=-1,allayId=-1;
 
     public static void rendered(int id) { if (ENABLED) rendered.add(id); }
 
@@ -140,15 +141,34 @@ public final class GameplaySmoke {
             });
             return;
         }
-        if (phase == 4 && serverChecked && ++ticks >= 30) {
-            phase = 100;
-            ClayMod.LOGGER.info("CLAY_GAMEPLAY_SMOKE_OK: world created, soldier and horse rendered, mounted client death handled, server death/drop verified, connection preserved");
+        if (phase == 4 && serverChecked) {
+            if(!(mc.level.getEntity(toySoldierId) instanceof SoldierDollEntity toy)||!rendered.contains(toySoldierId)||mc.level.getEntity(allayId)==null||!toy.hasToy("bow")||!toy.hasToy("shield")||!toy.hasToy("copper")||!mc.player.getMainHandItem().is(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get()))return;
+            mc.setScreenAndShow(new WhistleScreen(net.minecraft.world.InteractionHand.MAIN_HAND));
+            var button=(Button)mc.gui.screen().children().getFirst();
+            button.onPress(new KeyEvent(257,0,0)); // Real menu -> client packet -> server handler.
+            phase=5;ticks=0;return;
+        }
+        if(phase==5 && ++ticks==20){
+            mc.getSingleplayerServer().execute(()->{try{
+                var level=mc.getSingleplayerServer().overworld();
+                var toy=(SoldierDollEntity)level.getEntity(toySoldierId);
+                var allay=level.getEntity(allayId);
+                if(toy.orderMode!=0)throw new IllegalStateException("Whistle menu packet did not issue follow order");
+                toy.kill(level);
+                if(!allay.isAlive())throw new IllegalStateException("Soldier death killed allay");
+                menuChecked=true;
+            }catch(Throwable failure){serverFailure=failure.toString();}});
+        }
+        if(phase==5 && menuChecked && ticks>40){
+            phase=100;
+            ClayMod.LOGGER.info("CLAY_GAMEPLAY_SMOKE_OK: world, mounted deaths, allay flight, upgraded soldier rendering, save/load and actual whistle menu packet passed");
         }
     }
+
     private static void testToyFeatures(net.minecraft.server.level.ServerLevel level, net.minecraft.server.level.ServerPlayer player) {
         var s=EntityTypeRegistry.BLUE_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
         var allay=net.minecraft.world.entity.EntityTypes.ALLAY.create(level,EntitySpawnReason.COMMAND);
-        s.setPos(player.position().add(2,0,0));allay.setPos(s.position());
+        s.setPos(player.position().add(player.getLookAngle().scale(3)).add(0,.1,0));allay.setPos(s.position());
         level.addFreshEntity(s);level.addFreshEntity(allay);
         if(!s.startRiding(allay))throw new IllegalStateException("Allay refused soldier passenger");
         s.command(0,player,null);com.matthewperiut.clay.entity.AllayPilot.update(allay);s.tickCommand();
@@ -162,7 +182,7 @@ public final class GameplaySmoke {
         if(s.hurtServer(level,level.damageSources().fall(),100))throw new IllegalStateException("Feather did not prevent fall damage");
         var target=net.minecraft.world.entity.EntityTypes.PIG.create(level,EntitySpawnReason.COMMAND);
         target.setPos(s.position().add(3,0,0));level.addFreshEntity(target);
-        // Peaceful may remove it on the next server tick, but the command is tested synchronously.
+
         s.command(1,player,target);s.tickCommand();
         if(s.getTarget()!=target)throw new IllegalStateException("Attack command lost explicit target");
         var saved=net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING,level.registryAccess());
@@ -175,9 +195,12 @@ public final class GameplaySmoke {
         s.command(3,player,null);com.matthewperiut.clay.entity.AllayPilot.update(allay);
         if(allay.isNoAi())throw new IllegalStateException("Allay AI was not restored on release");
         if(s.orderMode!=3||s.getTarget()!=null)throw new IllegalStateException("Release command failed");
-        s.kill(level);
-        if(!allay.isAlive())throw new IllegalStateException("Soldier death killed allay");
-        allay.discard();target.discard();
+        target.discard();s.command(2,player,null);
+        toySoldierId=s.getId();allayId=allay.getId();
+        var whistle=new ItemStack(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get());
+        var tag=new net.minecraft.nbt.CompoundTag();tag.putShort("team",s.getSoldierTeam().getTeamId());
+        whistle.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,whistle);
         ClayMod.LOGGER.info("CLAY_TOY_FEATURES_OK: allay mount, flight orders, attack, stay, release, material upgrades, conflicts and fall protection");
     }
 
