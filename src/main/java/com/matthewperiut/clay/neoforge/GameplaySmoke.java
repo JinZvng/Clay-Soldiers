@@ -131,6 +131,7 @@ public final class GameplaySmoke {
                     if (actor.isAlive() || mount.isAlive()) throw new IllegalStateException("Server did not apply soldier and mount deaths");
                     int drops = level.getEntitiesOfClass(ItemEntity.class, bounds, item -> item.getItem().is(Items.GLOWSTONE_DUST)).stream().mapToInt(item -> item.getItem().getCount()).sum();
                     if (drops != 1) throw new IllegalStateException("Expected one authoritative upgrade drop, got " + drops);
+                    testToyFeatures(level, server.getPlayerList().getPlayers().getFirst());
                     serverChecked = true;
                 } catch (Throwable failure) { serverFailure = failure.toString(); }
             });
@@ -141,4 +142,31 @@ public final class GameplaySmoke {
             ClayMod.LOGGER.info("CLAY_GAMEPLAY_SMOKE_OK: world created, soldier and horse rendered, mounted client death handled, server death/drop verified, connection preserved");
         }
     }
+    private static void testToyFeatures(net.minecraft.server.level.ServerLevel level, net.minecraft.server.level.ServerPlayer player) {
+        var s=EntityTypeRegistry.BLUE_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
+        var allay=net.minecraft.world.entity.EntityType.ALLAY.create(level,EntitySpawnReason.COMMAND);
+        s.setPos(player.position().add(2,0,0));allay.setPos(s.position());
+        level.addFreshEntity(s);level.addFreshEntity(allay);
+        if(!s.startRiding(allay))throw new IllegalStateException("Allay refused soldier passenger");
+        s.command(0,player,null);s.tickCommand();
+        if(allay.getDeltaMovement().lengthSqr()==0)throw new IllegalStateException("Follow command did not pilot allay");
+        s.command(2,player,null);s.tickCommand();
+        var manager=UpgradeManager.INSTANCE;
+        for(var item:java.util.List.of(Items.BOW,Items.SHIELD,Items.COPPER_INGOT,Items.FEATHER))manager.applyUpdate(s,new ItemStack(item));
+        for(var name:java.util.List.of("bow","shield","copper","feather"))if(!s.hasToy(name))throw new IllegalStateException("Upgrade missing: "+name);
+        if(manager.canApplyUpdate(s,new ItemStack(Items.STICK))||manager.canApplyUpdate(s,new ItemStack(Items.LEATHER))||manager.canApplyUpdate(s,new ItemStack(Items.SLIME_BALL)))throw new IllegalStateException("Conflicting upgrades accepted");
+        if(s.hurtServer(level,level.damageSources().fall(),100))throw new IllegalStateException("Feather did not prevent fall damage");
+        var target=net.minecraft.world.entity.EntityType.ZOMBIE.create(level,EntitySpawnReason.COMMAND);
+        target.setPos(s.position().add(3,0,0));level.addFreshEntity(target);
+        // Peaceful may remove it on the next server tick, but the command is tested synchronously.
+        s.command(1,player,target);s.tickCommand();
+        if(s.getTarget()!=target)throw new IllegalStateException("Attack command lost explicit target");
+        s.command(3,player,null);
+        if(s.orderMode!=3||s.getTarget()!=null)throw new IllegalStateException("Release command failed");
+        s.kill(level);
+        if(!allay.isAlive())throw new IllegalStateException("Soldier death killed allay");
+        allay.discard();target.discard();
+        ClayMod.LOGGER.info("CLAY_TOY_FEATURES_OK: allay mount, flight orders, attack, stay, release, material upgrades, conflicts and fall protection");
+    }
+
 }

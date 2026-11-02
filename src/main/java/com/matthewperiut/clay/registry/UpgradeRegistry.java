@@ -26,6 +26,15 @@ public class UpgradeRegistry {
     public static final RegistrySupplier<ISoldierUpgrade> LEATHER_UPGRADE = SOLDIER_UPGRADE_REGISTER.register(SoldierLeatherUpgrade.IDENTIFIER, SoldierLeatherUpgrade::new);
     public static final RegistrySupplier<ISoldierUpgrade> GOLD_INGOT_UPGRADE = SOLDIER_UPGRADE_REGISTER.register(SoldierGoldIngotUpgrade.IDENTIFIER, SoldierGoldIngotUpgrade::new);
 
+    public static final RegistrySupplier<ISoldierUpgrade> FEATHER = toy("feather", net.minecraft.world.item.Items.FEATHER);
+    public static final RegistrySupplier<ISoldierUpgrade> BOW = toy("bow", net.minecraft.world.item.Items.BOW);
+    public static final RegistrySupplier<ISoldierUpgrade> SHIELD = toy("shield", net.minecraft.world.item.Items.SHIELD);
+    public static final RegistrySupplier<ISoldierUpgrade> SLIME = toy("slime", net.minecraft.world.item.Items.SLIME_BALL);
+    public static final RegistrySupplier<ISoldierUpgrade> COPPER = toy("copper", net.minecraft.world.item.Items.COPPER_INGOT);
+    public static final RegistrySupplier<ISoldierUpgrade> GUNPOWDER = toy("gunpowder", net.minecraft.world.item.Items.GUNPOWDER);
+    private static RegistrySupplier<ISoldierUpgrade> toy(String name, net.minecraft.world.item.Item material) {
+        return SOLDIER_UPGRADE_REGISTER.register(Identifier.fromNamespaceAndPath("clay", "upgrades/soldier/"+name), () -> new com.matthewperiut.clay.upgrade.ToyUpgrade(name, material));
+    }
     public static void init() {
     }
 }

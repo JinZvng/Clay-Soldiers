@@ -44,7 +44,7 @@ public class SoldierLeatherUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return itemStack.is(Items.LEATHER) && !soldier.upgrades.contains(this);
+        return !soldier.hasToy("copper") && itemStack.is(Items.LEATHER) && !soldier.upgrades.contains(this);
     }
 
     @Override

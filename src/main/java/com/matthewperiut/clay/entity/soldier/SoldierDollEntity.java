@@ -24,6 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
@@ -127,7 +128,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         this.targetSelector.addGoal(3, new SoldierAIFindTarget.Upgrade(this, EntityTypeTest.forClass(ItemEntity.class)));
         targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, SoldierDollEntity.class, true, (e, world) -> {
             if (e instanceof SoldierDollEntity target) {
-                return !target.getSoldierTeam().isinSameTeam(this.getSoldierTeam().getTeamId());
+                return orderMode == 3 && !target.getSoldierTeam().isinSameTeam(this.getSoldierTeam().getTeamId());
             }
             return false;
         }));
@@ -135,6 +136,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new com.matthewperiut.clay.entity.ai.goal.CommandGoal(this));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1, 1));
@@ -167,7 +169,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         // Mount removal and drops must only run in the authoritative world.
         if (level() instanceof ServerLevel server) {
             Entity vehicle = getVehicle();
-            if (vehicle != null) vehicle.kill(server);
+            if (vehicle instanceof HorseDollEntity) vehicle.kill(server);
             if (damageSource.type().equals(server.damageSources().inFire().type())
                     || damageSource.type().equals(server.damageSources().lava().type())) {
                 server.addFreshEntity(new ItemEntity(server, getX(), getY(), getZ(), new ItemStack(ItemRegistry.BRICK_SOLDIER.get())));
@@ -176,7 +178,10 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
                 server.addFreshEntity(new ItemEntity(server, getX(), getY(), getZ(), upgrade.getUpgradeItem()));
             }
         }
+        boolean blast = !toyExploded && hasToy("gunpowder");
+        toyExploded=true;
         super.die(damageSource);
+        if(blast && level() instanceof ServerLevel server) server.explode(this,getX(),getY(),getZ(),.6f,Level.ExplosionInteraction.NONE);
     }
 
     public void afterSoldierAttack(Entity target) {
@@ -207,6 +212,12 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 
     @Override
     public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
+        if (hasToy("feather") && source.is(net.minecraft.tags.DamageTypeTags.IS_FALL)) return false;
+        if (hasToy("shield") && tickCount >= shieldReady && source.getEntity()!=null) {
+            var direction=source.getEntity().position().subtract(position()).normalize();
+            if(getLookAngle().dot(direction)>.2) {shieldReady=tickCount+40;return false;}
+        }
+        if(hasToy("copper"))amount*=.7f;
         boolean hurt = super.hurtServer(world, source, amount);
         if (hurt && source.getEntity() instanceof SoldierDollEntity attacker) {
             for (ISoldierUpgrade upgrade : new HashSet<>(upgrades)) upgrade.doPostHurtEffects(attacker, this);
@@ -221,6 +232,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         swingForAttack(InteractionHand.MAIN_HAND);
         boolean hit = super.doHurtTarget(world, target);
         if (hit) {
+            if(hasToy("slime") && target instanceof LivingEntity living) living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS,40,0));
             triggerAnim("attackController", "attack");
             afterSoldierAttack(target);
         }
@@ -256,6 +268,11 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         CompoundTag nbt = input.read("ClayData", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+        orderMode=nbt.getInt("OrderMode").orElse(3);
+        try { commander=java.util.UUID.fromString(nbt.getString("Commander").orElse("")); } catch(IllegalArgumentException ignored) {commander=null;}
+        holdX=nbt.getDouble("HoldX").orElse(getX());holdY=nbt.getDouble("HoldY").orElse(getY());holdZ=nbt.getDouble("HoldZ").orElse(getZ());
+        // Explicit attack targets are deliberately released on reload.
+        if(orderMode==1)orderMode=2;
         short teamId = nbt.getShort(NBT_IDENTIFIER).orElse((short) 0);
         Optional<Map.Entry<ResourceKey<ITeam>, ITeam>> teamOptional = TeamRegistry.SOLDIER_TEAMS.entrySet()
                 .stream()
@@ -275,6 +292,8 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         CompoundTag nbt = new CompoundTag();
+        nbt.putInt("OrderMode",orderMode);if(commander!=null)nbt.putString("Commander",commander.toString());
+        nbt.putDouble("HoldX",holdX);nbt.putDouble("HoldY",holdY);nbt.putDouble("HoldZ",holdZ);
         nbt.putShort(NBT_IDENTIFIER, getSoldierTeam().getTeamId());
         ListTag nbtListForUpgrades = new ListTag();
         for (ISoldierUpgrade upgrade : this.upgrades) {
@@ -312,6 +331,49 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 
 //endregion
 
+    public int orderMode=3;
+    private java.util.UUID commander;
+    private double holdX,holdY,holdZ;
+    private int shieldReady, bowReady;
+    private boolean toyExploded;
+    public boolean hasToy(String name){return upgrades.stream().anyMatch(u->u instanceof com.matthewperiut.clay.upgrade.ToyUpgrade t && t.kind.equals(name));}
+    public void command(int mode,Player player,LivingEntity target){
+        orderMode=mode;commander=player.getUUID();holdX=getX();holdY=getY();holdZ=getZ();
+        setFollowingEntity(null);setTarget(mode==1?target:null);getNavigation().stop();
+    }
+    public void tickCommand(){
+        if(!(level() instanceof ServerLevel server))return;
+        LivingEntity target=getTarget();
+        if(orderMode!=1)setTarget(null);
+        net.minecraft.world.phys.Vec3 destination=null;
+        if(orderMode==0){var p=commander==null?null:server.getPlayerByUUID(commander);if(p!=null)destination=p.position();}
+        if(orderMode==2)destination=new net.minecraft.world.phys.Vec3(holdX,holdY,holdZ);
+        if(orderMode==1){
+            if(target==null||!target.isAlive()){orderMode=2;holdX=getX();holdY=getY();holdZ=getZ();return;}
+            destination=target.position();
+            getLookControl().setLookAt(target,30,30);
+            if(hasToy("bow"))shootToyBow(target);
+            else if(distanceToSqr(target)<2 && tickCount%20==0)doHurtTarget(server,target);
+        }
+        if(destination==null){getNavigation().stop();return;}
+        if(getVehicle() instanceof net.minecraft.world.entity.animal.allay.Allay allay){
+            allay.getNavigation().stop();
+            double altitude=orderMode==1&&!hasToy("bow")?0:1;
+            var delta=destination.add(0,altitude,0).subtract(allay.position());
+            allay.setDeltaMovement(delta.lengthSqr()>2?delta.normalize().scale(.18):delta.scale(.08));
+            allay.getMoveControl().setWantedPosition(destination.x,destination.y+altitude,destination.z,1);
+        } else if(distanceToSqr(destination)> (orderMode==1?1:4))getNavigation().moveTo(destination.x,destination.y,destination.z,1.15);
+        else getNavigation().stop();
+    }
+    private void shootToyBow(LivingEntity target){
+        if(!(level() instanceof ServerLevel server)||tickCount<bowReady||distanceToSqr(target)>144||!hasLineOfSight(target))return;
+        bowReady=tickCount+35;
+        var arrow=new net.minecraft.world.entity.projectile.arrow.Arrow(server,this,new ItemStack(Items.ARROW),new ItemStack(Items.BOW));
+        var delta=target.getEyePosition().subtract(arrow.position());
+        arrow.shoot(delta.x,delta.y+Math.sqrt(delta.x*delta.x+delta.z*delta.z)*.12,delta.z,1.2f,6);
+        arrow.setBaseDamage(.8);server.addFreshEntity(arrow);
+    }
+
     // temp stick fix
     public static final EntityDataAccessor<Boolean> HAS_STICK;
 
@@ -328,6 +390,13 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     @Override
     public void tick() {
         super.tick();
+        if(level() instanceof ServerLevel && isAlive()) {
+            if(tickCount%20==0 && !isPassenger() && orderMode!=2) {
+                var allays=level().getEntitiesOfClass(net.minecraft.world.entity.animal.allay.Allay.class,getBoundingBox().inflate(1.5),a->a.isAlive()&&!a.isVehicle());
+                if(!allays.isEmpty())startRiding(allays.getFirst());
+            }
+            if(orderMode==3 && hasToy("bow") && getTarget()!=null) shootToyBow(getTarget());
+        }
         if (!level().isClientSide() && tickCount % 20 == 0) {
             if(getMainHandItem().is(Items.STICK)) {
                 entityData.set(HAS_STICK, true);

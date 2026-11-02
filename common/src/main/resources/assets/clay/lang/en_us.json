@@ -61,5 +61,16 @@
   "item.clay.horse.soul_sand": "Soul Sand Horse",
   "entity.clay.horse.soul_sand": "Soul Sand Horse",
   "item.clay.horse.cake": "Cake Horse",
-  "entity.clay.horse.cake": "Cake Horse"
+  "entity.clay.horse.cake": "Cake Horse",
+  "item.clay.command_whistle": "Clay Whistle",
+  "clay.order.0": "Follow me",
+  "clay.order.1": "Attack target",
+  "clay.order.2": "Stay here",
+  "clay.order.3": "Release orders",
+  "clay.whistle.selected": "Selected team: %s",
+  "clay.whistle.mode": "Order: %s",
+  "clay.whistle.select": "Sneak + right-click a soldier to select its color.",
+  "clay.whistle.no_target": "Aim at a mob within 32 blocks.",
+  "clay.whistle.sent": "%s: %s soldiers",
+  "clay.whistle.help": "Sneak + use: change order. Use: send to selected color within 32 blocks."
 }

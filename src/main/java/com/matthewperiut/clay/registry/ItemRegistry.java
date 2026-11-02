@@ -68,6 +68,7 @@ public class ItemRegistry {
     public static final RegistrySupplier<Item> CAKE_HORSE_ITEM = registerHorseDollItem("horse/cake", CAKE_HORSE);
 //endregion
 
+    public static final RegistrySupplier<Item> COMMAND_WHISTLE = registerMiscItem("command_whistle", () -> new com.matthewperiut.clay.item.CommandWhistleItem(miscSettings("command_whistle").stacksTo(1)));
     // misc
     public static RegistrySupplier<Item> CLAY_DISRUPTOR = registerMiscItem("disruptor/clay", () -> new DisruptorItem(new ClayMaterial(), new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier("disruptor/clay"))).stacksTo(1)));
     public static RegistrySupplier<Item> TERRACOTTA_DISRUPTOR = registerMiscItem("disruptor/terracotta", () -> new DisruptorItem(new TerracottaMaterial(), new Item.Properties().setId(ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, com.matthewperiut.clay.ClayRegistries.getIdentifier("disruptor/terracotta"))).stacksTo(1)));

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "CIC",
+    "   "
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "I": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "clay:command_whistle",
+    "count": 1
+  }
+}

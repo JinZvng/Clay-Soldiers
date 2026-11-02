@@ -1,0 +1,13 @@
+{
+  "item.clay.command_whistle": "Silbato de arcilla",
+  "clay.order.0": "Seguirme",
+  "clay.order.1": "Atacar objetivo",
+  "clay.order.2": "Quedarse aquí",
+  "clay.order.3": "Liberar órdenes",
+  "clay.whistle.selected": "Equipo seleccionado: %s",
+  "clay.whistle.mode": "Orden: %s",
+  "clay.whistle.select": "Agáchate y haz clic derecho sobre un soldado para elegir su color.",
+  "clay.whistle.no_target": "Apunta a un mob a menos de 32 bloques.",
+  "clay.whistle.sent": "%s: %s soldados",
+  "clay.whistle.help": "Agachado + usar: cambiar orden. Usar: ordenar al color seleccionado en 32 bloques."
+}

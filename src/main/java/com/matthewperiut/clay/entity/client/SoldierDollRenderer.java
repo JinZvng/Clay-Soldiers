@@ -24,9 +24,15 @@ public final class SoldierDollRenderer extends GeoEntityRenderer<SoldierDollEnti
             @Override protected List<RenderData> getRelevantBones(SoldierDollEntity entity, Void ignored, ClayRenderState state, float tick) {
                 ItemStackRenderState main = new ItemStackRenderState();
                 ItemStackRenderState off = new ItemStackRenderState();
-                itemModelResolver.updateForLiving(main, entity.getMainHandItem(), ItemDisplayContext.THIRD_PERSON_LEFT_HAND, entity);
-                itemModelResolver.updateForLiving(off, entity.getOffhandItem(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, entity);
-                return List.of(RenderData.item("lhand", ItemDisplayContext.THIRD_PERSON_LEFT_HAND, main), RenderData.item("rhand", ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, off));
+                itemModelResolver.updateForLiving(main, entity.hasToy("bow") ? new net.minecraft.world.item.ItemStack(Items.BOW) : entity.getMainHandItem(), ItemDisplayContext.THIRD_PERSON_LEFT_HAND, entity);
+                itemModelResolver.updateForLiving(off, entity.hasToy("shield") ? new net.minecraft.world.item.ItemStack(Items.SHIELD) : entity.getOffhandItem(), ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, entity);
+                var result = new java.util.ArrayList<RenderData>();
+                if(entity.hasToy("copper")) {
+                    var armor=new ItemStackRenderState();itemModelResolver.updateForLiving(armor,new net.minecraft.world.item.ItemStack(Items.COPPER_INGOT),ItemDisplayContext.FIXED,entity);
+                    result.add(RenderData.item("torso",ItemDisplayContext.FIXED,armor));
+                }
+                result.addAll(List.of(RenderData.item("lhand", ItemDisplayContext.THIRD_PERSON_LEFT_HAND, main), RenderData.item("rhand", ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, off)));
+                return result;
             }
             @Override public void addRenderData(SoldierDollEntity entity, Void ignored, ClayRenderState state, float tick) {
                 state.addGeckolibData(CONTENTS, getRelevantBones(entity, ignored, state, tick));
