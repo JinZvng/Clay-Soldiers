@@ -13,6 +13,7 @@ public final class ClayModNeoForge {
     public ClayModNeoForge(IEventBus bus) {
         DeferredRegister.attach(bus);
         ClayMod.init();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(com.matthewperiut.clay.entity.AllayPilot::tick);
         bus.addListener(AttributeRegistry::register);
         bus.addListener(ClayNetworking::register);
         bus.addListener((FMLCommonSetupEvent event) -> event.enqueueWork(ClayMod::post));

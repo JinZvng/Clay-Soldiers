@@ -17,4 +17,3 @@ public final class WhistleScreen extends Screen {
  }
  public boolean isPauseScreen(){return false;}
 }
-
