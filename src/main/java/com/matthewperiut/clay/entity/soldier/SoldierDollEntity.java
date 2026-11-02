@@ -229,6 +229,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 
     @Override
     public boolean doHurtTarget(ServerLevel world, Entity target) {
+        if(hasToy("bow") && target instanceof LivingEntity living){shootToyBow(living);return false;}
         swingForAttack(InteractionHand.MAIN_HAND);
         boolean hit = super.doHurtTarget(world, target);
         if (hit) {
@@ -332,18 +333,19 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
 //endregion
 
     public int orderMode=3;
-    private java.util.UUID commander;
+    private java.util.UUID commander, orderedTarget;
     private double holdX,holdY,holdZ;
     private int shieldReady, bowReady;
     private boolean toyExploded;
     public boolean hasToy(String name){return upgrades.stream().anyMatch(u->u instanceof com.matthewperiut.clay.upgrade.ToyUpgrade t && t.kind.equals(name));}
     public void command(int mode,Player player,LivingEntity target){
-        orderMode=mode;commander=player.getUUID();holdX=getX();holdY=getY();holdZ=getZ();
+        orderMode=mode;commander=player.getUUID();orderedTarget=target==null?null:target.getUUID();holdX=getX();holdY=getY();holdZ=getZ();
         setFollowingEntity(null);setTarget(mode==1?target:null);getNavigation().stop();
     }
     public void tickCommand(){
         if(!(level() instanceof ServerLevel server))return;
-        LivingEntity target=getTarget();
+        LivingEntity target=orderedTarget==null?null:(server.getEntity(orderedTarget) instanceof LivingEntity living ? living:null);
+        if(orderMode==1)setTarget(target);
         if(orderMode!=1)setTarget(null);
         net.minecraft.world.phys.Vec3 destination=null;
         if(orderMode==0){var p=commander==null?null:server.getPlayerByUUID(commander);if(p!=null)destination=p.position();}
@@ -371,6 +373,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         var arrow=new net.minecraft.world.entity.projectile.arrow.Arrow(server,this,new ItemStack(Items.ARROW),new ItemStack(Items.BOW));
         var delta=target.getEyePosition().subtract(arrow.position());
         arrow.shoot(delta.x,delta.y+Math.sqrt(delta.x*delta.x+delta.z*delta.z)*.12,delta.z,1.2f,6);
+        if(hasToy("slime"))arrow.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS,40,0));
         arrow.setBaseDamage(.8);server.addFreshEntity(arrow);
     }
 

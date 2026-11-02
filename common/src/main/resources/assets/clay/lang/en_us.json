@@ -72,5 +72,5 @@
   "clay.whistle.select": "Sneak + right-click a soldier to select its color.",
   "clay.whistle.no_target": "Aim at a mob within 32 blocks.",
   "clay.whistle.sent": "%s: %s soldiers",
-  "clay.whistle.help": "Sneak + use: change order. Use: send to selected color within 32 blocks."
+  "clay.whistle.help": "Right-click: orders menu. Sneak-right-click a soldier: select its color. Range: 32 blocks."
 }

@@ -8,6 +8,7 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 public final class ClientEntrypoint {
     public static void init(IEventBus bus) {
         ClayMod.initClient();
+        com.matthewperiut.clay.item.CommandWhistleItem.openMenu=hand->net.minecraft.client.Minecraft.getInstance().setScreenAndShow(new WhistleScreen(hand));
         if (Boolean.getBoolean("clay.gameplaySmoke")) {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(GameplaySmoke::tick);
         }

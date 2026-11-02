@@ -144,7 +144,7 @@ public final class GameplaySmoke {
     }
     private static void testToyFeatures(net.minecraft.server.level.ServerLevel level, net.minecraft.server.level.ServerPlayer player) {
         var s=EntityTypeRegistry.BLUE_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
-        var allay=net.minecraft.world.entity.EntityType.ALLAY.create(level,EntitySpawnReason.COMMAND);
+        var allay=net.minecraft.world.entity.EntityTypes.ALLAY.create(level,EntitySpawnReason.COMMAND);
         s.setPos(player.position().add(2,0,0));allay.setPos(s.position());
         level.addFreshEntity(s);level.addFreshEntity(allay);
         if(!s.startRiding(allay))throw new IllegalStateException("Allay refused soldier passenger");
@@ -156,7 +156,7 @@ public final class GameplaySmoke {
         for(var name:java.util.List.of("bow","shield","copper","feather"))if(!s.hasToy(name))throw new IllegalStateException("Upgrade missing: "+name);
         if(manager.canApplyUpdate(s,new ItemStack(Items.STICK))||manager.canApplyUpdate(s,new ItemStack(Items.LEATHER))||manager.canApplyUpdate(s,new ItemStack(Items.SLIME_BALL)))throw new IllegalStateException("Conflicting upgrades accepted");
         if(s.hurtServer(level,level.damageSources().fall(),100))throw new IllegalStateException("Feather did not prevent fall damage");
-        var target=net.minecraft.world.entity.EntityType.ZOMBIE.create(level,EntitySpawnReason.COMMAND);
+        var target=net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level,EntitySpawnReason.COMMAND);
         target.setPos(s.position().add(3,0,0));level.addFreshEntity(target);
         // Peaceful may remove it on the next server tick, but the command is tested synchronously.
         s.command(1,player,target);s.tickCommand();

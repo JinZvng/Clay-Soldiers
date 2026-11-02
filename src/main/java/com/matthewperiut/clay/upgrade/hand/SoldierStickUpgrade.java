@@ -41,7 +41,7 @@ public class SoldierStickUpgrade implements ISoldierUpgrade, IDurable {
 
     @Override
     public boolean canUpgrade(ItemStack itemStack, SoldierDollEntity soldier) {
-        return !soldier.upgrades.contains(this) && itemStack.is(Items.STICK);
+        return !soldier.hasToy("bow") && !soldier.upgrades.contains(this) && itemStack.is(Items.STICK);
     }
 
     @Override

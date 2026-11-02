@@ -9,5 +9,5 @@
   "clay.whistle.select": "Agáchate y haz clic derecho sobre un soldado para elegir su color.",
   "clay.whistle.no_target": "Apunta a un mob a menos de 32 bloques.",
   "clay.whistle.sent": "%s: %s soldados",
-  "clay.whistle.help": "Agachado + usar: cambiar orden. Usar: ordenar al color seleccionado en 32 bloques."
+  "clay.whistle.help": "Clic derecho: menú de órdenes. Agachado + clic en soldado: elegir color. Alcance: 32 bloques."
 }
