@@ -362,8 +362,12 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
             allay.getNavigation().stop();
             double altitude=orderMode==2?0:(orderMode==1&&!hasToy("bow")?0:1);
             var delta=destination.add(0,altitude,0).subtract(allay.position());
-            allay.setDeltaMovement(delta.lengthSqr()>2?delta.normalize().scale(.18):delta.scale(.08));
-            allay.getMoveControl().setWantedPosition(destination.x,destination.y+altitude,destination.z,1);
+            var step=delta.lengthSqr()>2?delta.normalize().scale(.18):delta.scale(.08);
+            if(allay.horizontalCollision && delta.lengthSqr()>2)step=step.add(0,.18,0);
+            // NoAI allays do not run normal flying travel. Move once with collision
+            // resolution, then clear velocity to avoid applying movement twice.
+            allay.move(net.minecraft.world.entity.MoverType.SELF,step);
+            allay.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
         } else if(distanceToSqr(destination)> (orderMode==1?1:4))getNavigation().moveTo(destination.x,destination.y,destination.z,1.15);
         else getNavigation().stop();
     }

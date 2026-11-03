@@ -178,9 +178,10 @@ public final class GameplaySmoke {
         whistleItem.interactLivingEntity(control,player,s,net.minecraft.world.InteractionHand.MAIN_HAND);
         whistleItem.interactLivingEntity(control,player,allay,net.minecraft.world.InteractionHand.MAIN_HAND);
         if(s.getVehicle()!=allay)throw new IllegalStateException("Direct whistle selection/mount interaction failed");
+        var beforeFlight=allay.position();
         s.command(0,player,null);com.matthewperiut.clay.entity.AllayPilot.update(allay);s.tickCommand();
         if(!allay.isNoAi())throw new IllegalStateException("Native allay brain still competing with pilot");
-        if(allay.getDeltaMovement().lengthSqr()==0)throw new IllegalStateException("Follow command did not pilot allay");
+        if(allay.position().distanceToSqr(beforeFlight)==0)throw new IllegalStateException("Follow command did not pilot allay");
         s.command(2,player,null);s.tickCommand();
         var manager=UpgradeManager.INSTANCE;
         for(var item:java.util.List.of(Items.BOW,Items.SHIELD,Items.COPPER_INGOT,Items.FEATHER))manager.applyUpdate(s,new ItemStack(item));

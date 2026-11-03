@@ -58,7 +58,7 @@ public final class ToyBehaviorProbe {
             }
             if(ticks==100) {
                 check(flyer.getVehicle()==allay,"Automatic nearby allay mounting failed");
-                check(allay.distanceToSqr(player)<startDistance-20,"Allay did not physically follow over 100 ticks");
+                check(allay.distanceToSqr(player)<startDistance-20,"Allay did not physically follow over 100 ticks: start="+startDistance+", end="+allay.distanceToSqr(player)+", pos="+allay.position());
                 check(walker.distanceToSqr(player)<36,"Ground soldier did not follow over 100 ticks");
                 check(target.getHealth()<target.getMaxHealth(),"Bow arrows did not damage target over 80 ticks");
                 flyer.command(2,player,null);hold=allay.position();
