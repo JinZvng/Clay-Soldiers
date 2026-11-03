@@ -11,6 +11,7 @@ public final class ClientEntrypoint {
         com.matthewperiut.clay.item.CommandWhistleItem.openMenu=hand->net.minecraft.client.Minecraft.getInstance().setScreenAndShow(new WhistleScreen(hand));
         if (Boolean.getBoolean("clay.gameplaySmoke")) {
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(GameplaySmoke::tick);
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ToyBehaviorProbe::tick);
         }
         if (Boolean.getBoolean("clay.checkRenderStateStorage")) {
             bus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(ClientEntrypoint::checkRenderStateStorage));

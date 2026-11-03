@@ -339,7 +339,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     private boolean toyExploded;
     public boolean hasToy(String name){return upgrades.stream().anyMatch(u->u instanceof com.matthewperiut.clay.upgrade.ToyUpgrade t && t.kind.equals(name));}
     public void command(int mode,Player player,LivingEntity target){
-        orderMode=mode;commander=player.getUUID();orderedTarget=target==null?null:target.getUUID();holdX=getX();holdY=getY();holdZ=getZ();
+        orderMode=mode;commander=player.getUUID();orderedTarget=target==null?null:target.getUUID();holdX=getX();holdY=getVehicle()==null?getY():getVehicle().getY();holdZ=getZ();
         setFollowingEntity(null);setTarget(mode==1?target:null);getNavigation().stop();
     }
     public void tickCommand(){
@@ -351,7 +351,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         if(orderMode==0){var p=commander==null?null:server.getPlayerByUUID(commander);if(p!=null)destination=p.position();}
         if(orderMode==2)destination=new net.minecraft.world.phys.Vec3(holdX,holdY,holdZ);
         if(orderMode==1){
-            if(target==null||!target.isAlive()){orderMode=2;holdX=getX();holdY=getY();holdZ=getZ();return;}
+            if(target==null||!target.isAlive()){orderMode=2;holdX=getX();holdY=getVehicle()==null?getY():getVehicle().getY();holdZ=getZ();return;}
             destination=target.position();
             getLookControl().setLookAt(target,30,30);
             if(hasToy("bow"))shootToyBow(target);
@@ -360,7 +360,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
         if(destination==null){getNavigation().stop();return;}
         if(getVehicle() instanceof net.minecraft.world.entity.animal.allay.Allay allay){
             allay.getNavigation().stop();
-            double altitude=orderMode==1&&!hasToy("bow")?0:1;
+            double altitude=orderMode==2?0:(orderMode==1&&!hasToy("bow")?0:1);
             var delta=destination.add(0,altitude,0).subtract(allay.position());
             allay.setDeltaMovement(delta.lengthSqr()>2?delta.normalize().scale(.18):delta.scale(.08));
             allay.getMoveControl().setWantedPosition(destination.x,destination.y+altitude,destination.z,1);
@@ -394,7 +394,8 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     public void tick() {
         super.tick();
         if(level() instanceof ServerLevel && isAlive()) {
-            if(orderMode!=3 && tickCount%10==0) {
+            if(orderMode!=3)tickCommand();
+            if(tickCount%5==0) {
                 for(var item:level().getEntitiesOfClass(ItemEntity.class,getBoundingBox().inflate(1))) {
                     if(!item.getItem().isEmpty() && UpgradeManager.INSTANCE.canApplyUpdate(this,item.getItem())) {
                         UpgradeManager.INSTANCE.applyUpdate(this,item.getItem());item.getItem().shrink(1);

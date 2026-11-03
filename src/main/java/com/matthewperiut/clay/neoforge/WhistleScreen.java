@@ -12,7 +12,7 @@ public final class WhistleScreen extends Screen {
   for(int i=0;i<4;i++){final int mode=i;
    addRenderableWidget(Button.builder(Component.translatable("clay.order."+i),button->{
     ClientPacketDistributor.sendToServer(new WhistlePayload(mode,hand==InteractionHand.OFF_HAND));onClose();
-   }).bounds(width/2-100,height/2-55+i*27,200,22).build());
+   }).tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("clay.order.help."+i))).bounds(width/2-100,height/2-55+i*27,200,22).build());
   }
  }
  public boolean isPauseScreen(){return false;}

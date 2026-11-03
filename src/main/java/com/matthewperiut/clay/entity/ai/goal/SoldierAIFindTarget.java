@@ -26,7 +26,7 @@ public abstract class SoldierAIFindTarget<T extends Entity> extends Goal {
 
     @Override
     public boolean canUse() {
-        return this.soldier.getFollowingEntity() == null;
+        return this.soldier.orderMode==3 && this.soldier.getFollowingEntity() == null;
     }
 
     @Override

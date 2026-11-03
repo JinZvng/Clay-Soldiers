@@ -11,9 +11,13 @@ public final class AllayPilot {
   var data=allay.getPersistentData();
   boolean controlled=allay.getPassengers().stream().anyMatch(p->p instanceof SoldierDollEntity s && s.isAlive() && s.orderMode!=3);
   if(controlled){
-   if(!data.contains("ClayPilotPreviousAI"))data.putBoolean("ClayPilotPreviousAI",allay.isNoAi());
-   allay.setNoAi(true);
+   if(!data.contains("ClayPilotPreviousAI")) {
+    data.putBoolean("ClayPilotPreviousAI",allay.isNoAi());
+    data.putBoolean("ClayPilotPreviousGravity",allay.isNoGravity());
+   }
+   allay.setNoAi(true);allay.setNoGravity(true);
   }else if(data.contains("ClayPilotPreviousAI")){
+   allay.setNoGravity(data.getBoolean("ClayPilotPreviousGravity").orElse(false));data.remove("ClayPilotPreviousGravity");
    allay.setNoAi(data.getBoolean("ClayPilotPreviousAI").orElse(false));data.remove("ClayPilotPreviousAI");
   }
  }

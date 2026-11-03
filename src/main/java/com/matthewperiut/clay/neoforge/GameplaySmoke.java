@@ -44,6 +44,7 @@ public final class GameplaySmoke {
     }
 
     private static void advance(Minecraft mc) {
+        if(ToyBehaviorProbe.failure!=null)throw new IllegalStateException(ToyBehaviorProbe.failure);
         if (serverFailure != null) throw new IllegalStateException(serverFailure);
         if (phase == 0) {
             if (mc.gui.screen() != null && mc.gui.screen().getClass().getSimpleName().equals("AccessibilityOnboardingScreen")) {
@@ -156,10 +157,11 @@ public final class GameplaySmoke {
                 if(toy.orderMode!=0)throw new IllegalStateException("Whistle menu packet did not issue follow order");
                 toy.kill(level);
                 if(!allay.isAlive())throw new IllegalStateException("Soldier death killed allay");
+                ToyBehaviorProbe.start(mc.getSingleplayerServer().getPlayerList().getPlayers().getFirst());
                 menuChecked=true;
             }catch(Throwable failure){serverFailure=failure.toString();}});
         }
-        if(phase==5 && menuChecked && ticks>40){
+        if(phase==5 && menuChecked && ToyBehaviorProbe.done && ticks>40){
             phase=100;
             ClayMod.LOGGER.info("CLAY_GAMEPLAY_SMOKE_OK: world, mounted deaths, allay flight, upgraded soldier rendering, save/load and actual whistle menu packet passed");
         }
