@@ -26,6 +26,10 @@ public class CommandWhistleItem extends Item {
  private static void save(ItemStack s,CompoundTag d){s.set(DataComponents.CUSTOM_DATA,CustomData.of(d));}
  public InteractionResult interactLivingEntity(ItemStack stack,Player p,LivingEntity target,InteractionHand hand){
   if(p.level().isClientSide())return InteractionResult.SUCCESS;
+  // Player.interactOn supplies a COPY in creative mode. Persist selection on
+  // the actual inventory stack; otherwise the success message is misleading.
+  stack=p.getItemInHand(hand);
+  if(!(stack.getItem() instanceof CommandWhistleItem))return InteractionResult.PASS;
   if(target instanceof SoldierDollEntity s){
    var d=data(stack);d.putShort("team",s.getSoldierTeam().getTeamId());save(stack,d);
    p.sendOverlayMessage(Component.translatable("clay.whistle.selected",s.getName()));

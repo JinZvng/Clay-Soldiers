@@ -69,3 +69,6 @@ Drop feathers (fall immunity), bows (arrows every 35 ticks), shields (frontal bl
 - Lanza materiales a los pies de los soldados para mejorarlos, incluso mientras cumplen órdenes. Arco y palo son incompatibles, al igual que cobre y cuero. Pluma, slime y pólvora comparten un espacio especial.
 - Las órdenes afectan a los soldados del color elegido dentro de 32 bloques. No cargan chunks ni teletransportan ejércitos.
 - Nombres y ayudas en español, con cobertura para español de Chile y otros países, además del idioma de respaldo.
+
+## Corrección del silbato — 1.2.2
+La selección en creativo se guarda en el silbato real del inventario, no en la copia temporal que Minecraft entrega a la interacción. El menú muestra el color y permite cambiarlo con ◀ ▶; cada orden envía explícitamente ese color al servidor. Si ningún soldado de ese color está a menos de 32 bloques, aparece un aviso en pantalla y en el chat. También se comprueba el seguimiento sobre caballos.
