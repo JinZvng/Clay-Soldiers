@@ -4,9 +4,9 @@ license="MIT"
 [[mods]]
 modId="clay"
 version="1.2.1-26.3"
-displayName="Clay Soldiers"
+displayName="Soldaditos de arcilla"
 authors="Slainlite"
-description="Clay Soldiers port for NeoForge 26.3"
+description="Soldaditos de arcilla para NeoForge 26.3: monturas, silbato de mando y mejoras."
 [[dependencies.clay]]
 modId="minecraft"
 type="required"

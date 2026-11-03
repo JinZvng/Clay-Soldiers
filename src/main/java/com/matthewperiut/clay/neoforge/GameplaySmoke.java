@@ -172,7 +172,12 @@ public final class GameplaySmoke {
         var allay=net.minecraft.world.entity.EntityTypes.ALLAY.create(level,EntitySpawnReason.COMMAND);
         s.setPos(player.position().add(player.getLookAngle().scale(3)).add(0,.1,0));allay.setPos(s.position());
         level.addFreshEntity(s);level.addFreshEntity(allay);
-        if(!s.startRiding(allay))throw new IllegalStateException("Allay refused soldier passenger");
+        var control=new ItemStack(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get());
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,control);
+        var whistleItem=(com.matthewperiut.clay.item.CommandWhistleItem)control.getItem();
+        whistleItem.interactLivingEntity(control,player,s,net.minecraft.world.InteractionHand.MAIN_HAND);
+        whistleItem.interactLivingEntity(control,player,allay,net.minecraft.world.InteractionHand.MAIN_HAND);
+        if(s.getVehicle()!=allay)throw new IllegalStateException("Direct whistle selection/mount interaction failed");
         s.command(0,player,null);com.matthewperiut.clay.entity.AllayPilot.update(allay);s.tickCommand();
         if(!allay.isNoAi())throw new IllegalStateException("Native allay brain still competing with pilot");
         if(allay.getDeltaMovement().lengthSqr()==0)throw new IllegalStateException("Follow command did not pilot allay");
@@ -185,7 +190,7 @@ public final class GameplaySmoke {
         var target=net.minecraft.world.entity.EntityTypes.PIG.create(level,EntitySpawnReason.COMMAND);
         target.setPos(s.position().add(3,0,0));level.addFreshEntity(target);
 
-        s.command(1,player,target);s.tickCommand();
+        whistleItem.interactLivingEntity(control,player,target,net.minecraft.world.InteractionHand.MAIN_HAND);s.tickCommand();
         if(s.getTarget()!=target)throw new IllegalStateException("Attack command lost explicit target");
         var saved=net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING,level.registryAccess());
         s.saveWithoutId(saved);

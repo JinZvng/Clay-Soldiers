@@ -60,3 +60,12 @@ Special Thanks to @TrustNoOneElse for Upgrade Interface and related code
 Craft the Clay Whistle with copper around an iron nugget (top, left and right). Sneak-right-click a soldier to select its color. Use opens the Follow / Attack / Stay / Release menu; clicking a button sends that order to the selected color within 32 blocks. Attack aims at the nearest visible mob along the crosshair (not players or the selected color). A brief glow marks the target. Orders persist; attack changes to stay after reload.
 Soldiers can mount a free allay within 1.5 blocks. Follow and attack orders pilot the allay; the allay survives its rider's death. No teleporting or chunk loading is used.
 Drop feathers (fall immunity), bows (arrows every 35 ticks), shields (frontal block every 40 ticks), slime balls (brief slowness), copper ingots (30% damage reduction), or gunpowder (small death explosion without block damage). Bow conflicts with stick, copper with leather; feather/slime/gunpowder occupy one special slot. Existing upgrades remain supported. Bow, shield and copper badge appear on the soldier.
+
+## Uso en español — 1.2.1
+- Clic derecho con el silbato sobre un soldado: selecciona su color y muestra sus mejoras.
+- Clic derecho en el aire: abre el menú Seguirme / Atacar objetivo / Quedarse aquí / Liberar órdenes.
+- Clic derecho sobre un mob: ordena atacarlo al color seleccionado. También puedes apuntarle antes de abrir el menú.
+- Clic derecho sobre un allay libre: sube el soldado del color elegido más cercano, a menos de 8 bloques. Después usa Seguirme o Atacar para pilotarlo.
+- Lanza materiales a los pies de los soldados para mejorarlos, incluso mientras cumplen órdenes. Arco y palo son incompatibles, al igual que cobre y cuero. Pluma, slime y pólvora comparten un espacio especial.
+- Las órdenes afectan a los soldados del color elegido dentro de 32 bloques. No cargan chunks ni teletransportan ejércitos.
+- Nombres y ayudas en español, con cobertura para español de Chile y otros países, además del idioma de respaldo.
