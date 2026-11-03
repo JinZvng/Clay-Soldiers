@@ -17,7 +17,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 /** Tests real simulation ticks rather than invoking command methods once. Opt-in CI only. */
 public final class ToyBehaviorProbe {
     private static ServerPlayer player;
-    private static SoldierDollEntity flyer, walker, archer;
+    private static SoldierDollEntity flyer, walker, archer, horseRider;
+    private static com.matthewperiut.clay.entity.horse.HorseDollEntity horse;
     private static Allay allay;
     private static Pig target, flightTarget;
     private static Vec3 hold;
@@ -46,6 +47,10 @@ public final class ToyBehaviorProbe {
         }
         target=EntityTypes.PIG.create(level,EntitySpawnReason.COMMAND);
         target.setPos(archer.position().add(0,0,4));target.setNoAi(true);level.addFreshEntity(target);
+        horse=EntityTypeRegistry.DIRT_HORSE.get().create(level,EntitySpawnReason.COMMAND);
+        horse.setPos(p.position().add(-9,.1,-5));level.addFreshEntity(horse);
+        horseRider=EntityTypeRegistry.RED_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
+        horseRider.setPos(horse.position());level.addFreshEntity(horseRider);horseRider.startRiding(horse);horseRider.command(0,p,null);
         ClayMod.LOGGER.info("CLAY_BEHAVIOR_PROBE_STARTED");
     }
     public static void tick(ServerTickEvent.Post event) {
@@ -59,6 +64,8 @@ public final class ToyBehaviorProbe {
             if(ticks==100) {
                 check(flyer.getVehicle()==allay,"Automatic nearby allay mounting failed");
                 check(allay.distanceToSqr(player)<startDistance-20,"Allay did not physically follow over 100 ticks: start="+startDistance+", end="+allay.distanceToSqr(player)+", pos="+allay.position());
+                check(horse.distanceToSqr(player)<36,"Horse-mounted soldier did not follow over 100 ticks");
+                horseRider.command(2,player,null);
                 check(walker.distanceToSqr(player)<36,"Ground soldier did not follow over 100 ticks");
                 check(target.getHealth()<target.getMaxHealth(),"Bow arrows did not damage target over 80 ticks");
                 flyer.command(2,player,null);hold=allay.position();
@@ -74,7 +81,7 @@ public final class ToyBehaviorProbe {
                 check(flightTarget.getHealth()<flightTarget.getMaxHealth(),"Mounted melee attack did not damage target over 100 ticks");
                 done=true;
                 ClayMod.LOGGER.info("CLAY_SUSTAINED_BEHAVIOR_OK: automatic mount, physical flying/ground follow, dropped upgrades, arrow hits, stable hover and mounted melee across 280 server ticks");
-                flyer.discard();walker.discard();archer.discard();allay.discard();target.discard();flightTarget.discard();
+                horseRider.discard();horse.discard();flyer.discard();walker.discard();archer.discard();allay.discard();target.discard();flightTarget.discard();
             }
         }catch(Throwable error){failure=error.toString();ClayMod.LOGGER.error("CLAY_GAMEPLAY_SMOKE_FAILED",error);}
     }

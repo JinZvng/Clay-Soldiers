@@ -256,7 +256,9 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
     }
 
     public ITeam getSoldierTeam() {
-        return team == null ? CLAY_TEAM.get() : team;
+        if(team!=null)return team;
+        String color=BuiltInRegistries.ENTITY_TYPE.getKey(getType()).getPath().replace("soldier/", "");
+        return TeamRegistry.SOLDIER_TEAMS.entrySet().stream().filter(e->e.getKey().identifier().getPath().equals(color)).map(java.util.Map.Entry::getValue).findFirst().orElse(CLAY_TEAM.get());
     }
 
     public void setSoldierTeam(@NotNull ITeam team) {
@@ -357,7 +359,7 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
             if(hasToy("bow"))shootToyBow(target);
             else if(distanceToSqr(target)<2 && tickCount%20==0)doHurtTarget(server,target);
         }
-        if(destination==null){getNavigation().stop();return;}
+        if(destination==null){getNavigation().stop();if(getVehicle() instanceof HorseDollEntity horse)horse.getNavigation().stop();return;}
         if(getVehicle() instanceof net.minecraft.world.entity.animal.allay.Allay allay){
             allay.getNavigation().stop();
             double altitude=orderMode==2?0:(orderMode==1&&!hasToy("bow")?0:1);
@@ -368,8 +370,12 @@ public class SoldierDollEntity extends PathfinderMob implements com.geckolib.ani
             // resolution, then clear velocity to avoid applying movement twice.
             allay.move(net.minecraft.world.entity.MoverType.SELF,step);
             allay.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-        } else if(distanceToSqr(destination)> (orderMode==1?1:4))getNavigation().moveTo(destination.x,destination.y,destination.z,1.15);
-        else getNavigation().stop();
+        } else {
+            var mover=getVehicle() instanceof HorseDollEntity horse?horse:this;
+            double stopDistance=orderMode==1?(hasToy("bow")?36:1):4;
+            if(mover.distanceToSqr(destination)>stopDistance)mover.getNavigation().moveTo(destination.x,destination.y,destination.z,1.15);
+            else mover.getNavigation().stop();
+        }
     }
     private void shootToyBow(LivingEntity target){
         if(!(level() instanceof ServerLevel server)||tickCount<bowReady||distanceToSqr(target)>144||!hasLineOfSight(target))return;

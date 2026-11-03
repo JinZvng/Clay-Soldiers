@@ -80,7 +80,14 @@ public class HorseDollEntity extends PathfinderMob implements GeoAnimatable
     protected void registerGoals()
     {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.0));
+        this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.Goal() {
+            {setFlags(java.util.EnumSet.of(Flag.MOVE,Flag.LOOK));}
+            @Override public boolean canUse(){return getFirstPassenger() instanceof com.matthewperiut.clay.entity.soldier.SoldierDollEntity s && s.orderMode!=3;}
+            @Override public boolean canContinueToUse(){return canUse();}
+            @Override public void start(){getNavigation().stop();}
+            @Override public void stop(){getNavigation().stop();}
+        });
+        this.goalSelector.addGoal(2, new PanicGoal(this, 1.0));
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0));
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));

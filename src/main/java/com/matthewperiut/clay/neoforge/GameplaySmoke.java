@@ -29,7 +29,7 @@ public final class GameplaySmoke {
     private static volatile int soldierId = -1, horseId = -1;
     private static volatile String serverFailure;
     private static volatile boolean serverChecked, menuChecked;
-    private static volatile int toySoldierId=-1,allayId=-1;
+    private static volatile int toySoldierId=-1,allayId=-1,sentinelId=-1;
 
     public static void rendered(int id) { if (ENABLED) rendered.add(id); }
 
@@ -81,7 +81,7 @@ public final class GameplaySmoke {
         if (phase == 2) {
             if (mc.level == null || mc.player == null || mc.getSingleplayerServer() == null || ++ticks < 40) return;
             mc.setScreenAndShow(new WhistleScreen(net.minecraft.world.InteractionHand.MAIN_HAND));
-            if(mc.gui.screen().children().stream().filter(c->c instanceof Button).count()!=4)throw new IllegalStateException("Whistle menu did not expose four orders");
+            if(mc.gui.screen().children().stream().filter(c->c instanceof Button).count()!=6)throw new IllegalStateException("Whistle menu did not expose four orders and two color selectors");
             phase = 3;
             ticks = 0;
             var server = mc.getSingleplayerServer();
@@ -145,9 +145,19 @@ public final class GameplaySmoke {
         if (phase == 4 && serverChecked) {
             if(!(mc.level.getEntity(toySoldierId) instanceof SoldierDollEntity toy)||!rendered.contains(toySoldierId)||mc.level.getEntity(allayId)==null||!toy.hasToy("bow")||!toy.hasToy("shield")||!toy.hasToy("copper")||!mc.player.getMainHandItem().is(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get()))return;
             mc.setScreenAndShow(new WhistleScreen(net.minecraft.world.InteractionHand.MAIN_HAND));
-            var button=(Button)mc.gui.screen().children().getFirst();
+            var menu=(WhistleScreen)mc.gui.screen();
+            if(menu.selectedTeam()!=4)throw new IllegalStateException("Fresh whistle did not identify nearest blue faction");
+            ((Button)menu.children().stream().filter(c->c instanceof Button button&&button.getMessage().getString().equals("◀")).findFirst().orElseThrow()).onPress(new KeyEvent(257,0,0));
+            if(menu.selectedTeam()!=3)throw new IllegalStateException("Previous-color selector failed");
+            ((Button)menu.children().stream().filter(c->c instanceof Button button&&button.getMessage().getString().equals("▶")).findFirst().orElseThrow()).onPress(new KeyEvent(257,0,0));
+            var button=(Button)menu.children().stream().filter(c->c instanceof Button b&&b.getMessage().getString().equals(net.minecraft.network.chat.Component.translatable("clay.order.0").getString())).findFirst().orElseThrow();
             button.onPress(new KeyEvent(257,0,0)); // Real menu -> client packet -> server handler.
             phase=5;ticks=0;return;
+        }
+        if(phase==5 && ticks==4){
+            var other=mc.level.getEntity(sentinelId);
+            if(other==null)throw new IllegalStateException("Missing red sentinel for real interaction test");
+            mc.gameMode.interact(mc.player,other,new net.minecraft.world.phys.EntityHitResult(other),net.minecraft.world.InteractionHand.MAIN_HAND);
         }
         if(phase==5 && ++ticks==20){
             mc.getSingleplayerServer().execute(()->{try{
@@ -155,6 +165,10 @@ public final class GameplaySmoke {
                 var toy=(SoldierDollEntity)level.getEntity(toySoldierId);
                 var allay=level.getEntity(allayId);
                 if(toy.orderMode!=0)throw new IllegalStateException("Whistle menu packet did not issue follow order");
+                if(com.matthewperiut.clay.item.CommandWhistleItem.selectedTeam(mc.getSingleplayerServer().getPlayerList().getPlayers().getFirst().getMainHandItem())!=1)throw new IllegalStateException("Actual client entity interaction did not select red faction");
+                if(((SoldierDollEntity)level.getEntity(sentinelId)).orderMode!=3)throw new IllegalStateException("Blue order leaked to red faction");
+                level.getEntity(sentinelId).discard();
+                ClayMod.LOGGER.info("CLAY_FRESH_WHISTLE_MENU_OK: unbound item, visible color controls, actual order packet, blue recipients and red exclusion");
                 toy.kill(level);
                 if(!allay.isAlive())throw new IllegalStateException("Soldier death killed allay");
                 ToyBehaviorProbe.start(mc.getSingleplayerServer().getPlayerList().getPlayers().getFirst());
@@ -170,7 +184,7 @@ public final class GameplaySmoke {
     private static void testToyFeatures(net.minecraft.server.level.ServerLevel level, net.minecraft.server.level.ServerPlayer player) {
         var s=EntityTypeRegistry.BLUE_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
         var allay=net.minecraft.world.entity.EntityTypes.ALLAY.create(level,EntitySpawnReason.COMMAND);
-        s.setPos(player.position().add(player.getLookAngle().scale(3)).add(0,.1,0));allay.setPos(s.position());
+        s.setPos(player.position().add(player.getLookAngle().scale(2)).add(0,.1,0));allay.setPos(s.position());
         level.addFreshEntity(s);level.addFreshEntity(allay);
         var control=new ItemStack(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get());
         player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,control);
@@ -206,8 +220,10 @@ public final class GameplaySmoke {
         target.discard();s.command(2,player,null);
         toySoldierId=s.getId();allayId=allay.getId();
         var whistle=new ItemStack(com.matthewperiut.clay.registry.ItemRegistry.COMMAND_WHISTLE.get());
-        var tag=new net.minecraft.nbt.CompoundTag();tag.putShort("team",s.getSoldierTeam().getTeamId());
-        whistle.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA,net.minecraft.world.item.component.CustomData.of(tag));
+        var sentinel=EntityTypeRegistry.RED_SOLDIER.get().create(level,EntitySpawnReason.COMMAND);
+        sentinel.setPos(player.position().add(player.getLookAngle().scale(2.7)));sentinel.setNoAi(true);level.addFreshEntity(sentinel);sentinelId=sentinel.getId();
+        // Fresh creative-tab item deliberately has NO saved team. The menu must
+        // identify blue and send it explicitly, rather than relying on old NBT.
         player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,whistle);
         ClayMod.LOGGER.info("CLAY_TOY_FEATURES_OK: allay mount, flight orders, attack, stay, release, material upgrades, conflicts and fall protection");
     }

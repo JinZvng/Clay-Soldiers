@@ -13,6 +13,16 @@ public class CommandWhistleItem extends Item {
  public static java.util.function.Consumer<InteractionHand> openMenu=hand->{};
  public CommandWhistleItem(Properties p){super(p);}
  private static CompoundTag data(ItemStack s){return s.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();}
+ public static int selectedTeam(ItemStack stack){return data(stack).getShort("team").map(Short::intValue).orElse(-1);}
+ public static Component teamName(int id){
+  String[] colors={"clay","red","yellow","green","blue","orange","magenta","lightblue","lime","pink","cyan","purple","brown","black","gray","white"};
+  return Component.translatable("clay.color."+colors[Math.max(0,Math.min(15,id))]);
+ }
+ public static InteractionResult issueSelected(Level level,Player p,InteractionHand hand,int mode,int team){
+  if(level.isClientSide()||p.isSpectator()||team<0||team>15||mode<0||mode>3||!(p.getItemInHand(hand).getItem() instanceof CommandWhistleItem))return InteractionResult.FAIL;
+  var stack=p.getItemInHand(hand);var tag=data(stack);tag.putShort("team",(short)team);save(stack,tag);
+  return issue(level,p,hand,mode);
+ }
  private static void save(ItemStack s,CompoundTag d){s.set(DataComponents.CUSTOM_DATA,CustomData.of(d));}
  public InteractionResult interactLivingEntity(ItemStack stack,Player p,LivingEntity target,InteractionHand hand){
   if(p.level().isClientSide())return InteractionResult.SUCCESS;
@@ -59,7 +69,8 @@ public class CommandWhistleItem extends Item {
   if(mode==1 && (target==null || target instanceof Player || target.distanceToSqr(p)>1024 || !p.hasLineOfSight(target)))return InteractionResult.FAIL;
   int count=0;
   for(var s:level.getEntitiesOfClass(SoldierDollEntity.class,p.getBoundingBox().inflate(32),s->s.isAlive()&&s.getSoldierTeam().getTeamId()==d.getShort("team").orElse((short)0))){s.command(mode,p,target);count++;}
-  p.sendOverlayMessage(Component.translatable("clay.whistle.sent",Component.translatable("clay.order."+mode),count));
+  var message=count==0?Component.translatable("clay.whistle.empty",teamName(selectedTeam(stack))):Component.translatable("clay.whistle.confirm",Component.translatable("clay.order."+mode),teamName(selectedTeam(stack)),count);
+  p.sendOverlayMessage(message);p.sendSystemMessage(message);
   p.getCooldowns().addCooldown(stack,10);return InteractionResult.SUCCESS;
  }
  public void appendHoverText(ItemStack s,Item.TooltipContext c,net.minecraft.world.item.component.TooltipDisplay display,java.util.function.Consumer<Component> out,TooltipFlag f){out.accept(Component.translatable("clay.whistle.help"));out.accept(Component.translatable("clay.whistle.mode",Component.translatable("clay.order."+data(s).getInt("mode").orElse(0))));}

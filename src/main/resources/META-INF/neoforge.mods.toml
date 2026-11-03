@@ -3,7 +3,7 @@ loaderVersion="[12,)"
 license="MIT"
 [[mods]]
 modId="clay"
-version="1.2.1-26.3"
+version="1.2.2-26.3"
 displayName="Soldaditos de arcilla"
 authors="Slainlite"
 description="Soldaditos de arcilla para NeoForge 26.3: monturas, silbato de mando y mejoras."
